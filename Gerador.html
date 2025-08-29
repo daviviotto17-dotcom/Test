@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Link</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #resultContainer {
+            margin-top: 20px;
+            word-wrap: break-word;
+        }
+        #resultLink {
+            font-weight: bold;
+            color: #007bff;
+            display: block;
+            margin-bottom: 10px;
+        }
+        #previewContainer {
+            margin-top: 20px;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+        }
+        iframe {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Gerador de Link Customizado</h1>
+    <p>Cole o link do GitHub para transformá-lo.</p>
+    <input type="text" id="linkInput" placeholder="Ex: https://github.com/daviviotto17-dotcom/MySchoolFile/blob/main/DrawClimb.html">
+    <button onclick="generateLink()">Gerar Link</button>
+    <button onclick="copyLink()" id="copyButton" style="display: none;">Copiar Link</button>
+
+    <div id="resultContainer" style="display: none;">
+        <p>Novo link gerado:</p>
+        <span id="resultLink"></span>
+    </div>
+
+    <div id="previewContainer" style="display: none;">
+        <h3>Prévia</h3>
+        <iframe id="linkPreview" src="" frameborder="0"></iframe>
+    </div>
+</div>
+
+<script>
+    function generateLink() {
+        const input = document.getElementById('linkInput').value;
+        const resultContainer = document.getElementById('resultContainer');
+        const resultLinkSpan = document.getElementById('resultLink');
+        const previewContainer = document.getElementById('previewContainer');
+        const iframe = document.getElementById('linkPreview');
+        const copyButton = document.getElementById('copyButton');
+
+        if (input.trim() === '') {
+            alert('Por favor, insira um link válido.');
+            return;
+        }
+
+        try {
+            const url = new URL(input);
+            const pathSegments = url.pathname.split('/');
+            const lastPart = pathSegments[pathSegments.length - 1];
+            const newLink = `https://daviviotto17-dotcom.github.io/MySchoolFile/${lastPart}`;
+
+            resultLinkSpan.textContent = newLink;
+            resultContainer.style.display = 'block';
+            copyButton.style.display = 'inline-block';
+
+            // Atualiza o iframe para mostrar a prévia do link original
+            iframe.src = input;
+            previewContainer.style.display = 'block';
+
+        } catch (e) {
+            alert('URL inválida. Por favor, verifique o formato do link.');
+        }
+    }
+
+    function copyLink() {
+        const resultLinkSpan = document.getElementById('resultLink');
+        const textToCopy = resultLinkSpan.textContent;
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            alert('Link copiado para a área de transferência!');
+        }).catch(err => {
+            console.error('Falha ao copiar o texto: ', err);
+            alert('Erro ao copiar o link. Por favor, tente manualmente.');
+        });
+    }
+</script>
+
+</body>
+</html>
