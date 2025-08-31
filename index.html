@@ -7,6 +7,36 @@
     <title>Ultimate Car Driving</title>
     <link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/daviviotto17-dotcom/Test@main/favicon.ico">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/daviviotto17-dotcom/Test@main/style.css">
+        <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Evita barras de rolagem */
+        }
+        .webgl-content {
+            width: 100vw;  /* Ocupa 100% da largura da tela */
+            height: 100vh; /* Ocupa 100% da altura da tela */
+            position: absolute; /* Posição absoluta para cobrir tudo */
+            top: 0;
+            left: 0;
+            display: flex; /* Garante que os filhos (gameContainer) se expandam */
+            justify-content: center;
+            align-items: center;
+        }
+        #gameContainer {
+            width: 100% !important; /* Ocupa 100% do contêiner pai */
+            height: 100% !important; /* Ocupa 100% do contêiner pai */
+            max-width: none !important; /* Remove qualquer limite de largura */
+            max-height: none !important; /* Remove qualquer limite de altura */
+            background: #000; /* Fundo preto para preencher o espaço */
+        }
+        #gameCanvas {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: none !important;
+            max-height: none !important;
+        }
+        </style>
 </head>
 
 <body>
