@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="pt-BR">
 
 <head>
     <meta charset="utf-8">
@@ -36,6 +36,50 @@
             max-width: none !important;
             max-height: none !important;
         }
+        
+        /* ESTILOS DO SEU CARREGAMENTO CUSTOMIZADO */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f1f1f1; /* Cor de fundo da tela de carregamento */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.87s ease-in-out; /* Tempo da transição para esconder */
+        }
+
+        .loading-container {
+            width: 300px;
+            text-align: center;
+        }
+
+        .loading-text {
+            font-family: sans-serif;
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        /* Estilos para a barra de progresso */
+        .loading-bar-container {
+            width: 100%;
+            height: 15px;
+            background-color: #ddd; /* Cor da barra vazia */
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .loading-bar-fill {
+            height: 100%;
+            width: 100%; /* Definido como 100% para simular a barra cheia visualmente */
+            background-color: #4CAF50; /* Cor da barra cheia */
+            border-radius: 10px;
+            /* A animação 'fillBar' foi removida, pois a barra será escondida por script no momento certo */
+        }
         </style>
 </head>
 
@@ -43,6 +87,7 @@
     <div class="webgl-content">
         <div id="gameContainer" class="unity-mobile">
             <canvas id="gameCanvas" style="cursor: default;"></canvas>
+            
             <div id="loadingBlock" style="display: none;">
                 <img class="logo" src="https://cdn.jsdelivr.net/gh/daviviotto17-dotcom/Test@main/Logo.png">
                 <span class="subtitle"><br></span>
@@ -63,6 +108,7 @@
                     </div>
                 </div>
             </div>
+            
             <div id="errorBrowserBlock" style="display:none;">
                 <img class="logo" src="https://cdn.jsdelivr.net/gh/daviviotto17-dotcom/Test@main/Logo.png">
                 <span class="subtitle"><br></span>
@@ -73,6 +119,25 @@
             </div>
         </div>
     </div>
+    
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-container">
+            <div class="loading-text">Carregando...</div>
+            <div class="loading-bar-container">
+                <div class="loading-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="overlay" style="
+      position:fixed;
+      top:0; left:0;
+      width:100vw; height:100vh;
+      background:transparent;
+      z-index:9999;
+      cursor:pointer;
+      display:none; /* Começa escondido. Será ativado após o jogo da Unity carregar. */
+    "></div>
 
     <script>
         function ToggleFullScreen() {
@@ -167,6 +232,8 @@
             config.devicePixelRatio = 1;
         }
         CheckCompatibility();
+        
+        // --- FUNÇÕES DE CARREGAMENTO DE DADOS E DO JOGO (MODIFICADAS) ---
 
         async function loadDataFile() {
             const parts = [
@@ -196,6 +263,25 @@
             config.dataUrl = URL.createObjectURL(blob);
         }
 
+        /**
+         * Esconde o seu overlay customizado e mostra o overlay de clique para tela cheia.
+         * Isso é chamado quando a Unity termina o carregamento.
+         */
+        function hideLoadingOverlayAndStartGame() {
+             const loadingOverlay = document.getElementById('loadingOverlay');
+             const fullScreenOverlay = document.getElementById('overlay');
+             
+             // 1. Esconde a sua tela de carregamento customizada com transição suave
+             loadingOverlay.style.opacity = '0';
+             setTimeout(() => {
+                 loadingOverlay.style.display = 'none';
+                 
+                 // 2. Mostra o overlay de clique para iniciar o jogo/tela cheia
+                 fullScreenOverlay.style.display = "block"; 
+             }, 870); // Este tempo deve ser igual à transição de opacidade do CSS (0.87s)
+        }
+
+
         async function loadGame() {
             await loadDataFile();
 
@@ -203,10 +289,18 @@
             script.src = loaderUrl;
             script.onload = () => {
                 createUnityInstance(canvas, config, (progress) => {
+                    // Atualiza a barra de progresso da Unity
                     progressBarFull.style.width = 100 * progress + "%";
                     progressBarEmpty.style.width = (100 * (1 - progress)) + "%";
                 }).then((unityInstance) => {
-                    loadingBar.style.display = "none";
+                    // >>> O JOGO DA UNITY TERMINOU DE CARREGAR AQUI! <<<
+                    
+                    // Esconde a barra de progresso da Unity
+                    loadingBar.style.display = "none"; 
+                    
+                    // Chama a função para esconder o seu overlay e iniciar o jogo
+                    hideLoadingOverlayAndStartGame(); 
+                    
                 }).catch((message) => {
                     alert(message);
                 });
@@ -214,143 +308,49 @@
             document.body.appendChild(script);
         }
 
-        loadGame();
+        loadGame(); // Inicia o carregamento do jogo
+
+        // --- FUNÇÕES DE TELA CHEIA E ORIENTAÇÃO (MODIFICADAS) ---
+
+        function enterFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+        }
+
+        function lockScreenOrientation() {
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch((err) => {
+                    console.warn("Não foi possível bloquear a orientação da tela:", err);
+                });
+            } else {
+                console.warn("A API de orientação de tela não é suportada ou a permissão foi negada.");
+            }
+        }
+        
+        // Listener para o overlay de clique
+        overlay.addEventListener("click", () => {
+            overlay.style.display = "none";
+            enterFullscreen();
+            
+            // Adiciona um pequeno atraso para garantir que a tela cheia seja ativada
+            setTimeout(() => {
+                lockScreenOrientation();
+            }, 500);
+        });
+
+        // Listener para quando o usuário sai da tela cheia
+        document.addEventListener("fullscreenchange", () => {
+            if (!document.fullscreenElement) {
+                // Se sair da tela cheia, mostra o overlay de clique novamente
+                overlay.style.display = "block";
+            }
+        });
     </script>
-    <style>
-  /* CARREGAMENTO OVERLAY! */
-  .loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #f1f1f1; /* Cor de fundo da tela de carregamento */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    transition: opacity 1s ease-in-out;
-  }
-
-  .loading-container {
-    width: 300px;
-    text-align: center;
-  }
-
-  .loading-text {
-    font-family: sans-serif;
-    font-size: 1.2rem;
-    color: #333;
-    margin-bottom: 15px;
-  }
-
-  /* Estilos para a barra de progresso */
-  .loading-bar-container {
-    width: 100%;
-    height: 15px;
-    background-color: #ddd; /* Cor da barra vazia */
-    border-radius: 10px;
-    overflow: hidden;
-  }
-
-  .loading-bar-fill {
-    height: 100%;
-    width: 0;
-    background-color: #4CAF50; /* Cor da barra cheia */
-    border-radius: 10px;
-    animation: fillBar 8s ease-in-out forwards;
-  }
-
-  /* Animação para preencher a barra */
-  @keyframes fillBar {
-    from {
-      width: 0;
-    }
-    to {
-      width: 100%;
-    }
-  }
-</style>
-
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-container">
-    <div class="loading-text">Carregando...</div>
-    <div class="loading-bar-container">
-      <div class="loading-bar-fill"></div>
-    </div>
-  </div>
-</div>
-
-<script>
-  // Script para esconder a tela de carregamento após a animação
-  window.addEventListener('load', () => {
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    
-    // A animação da barra de progressos (definido no CSS)
-    // Usamos um setTimeout para garantir que a tela de carregamento
-    // só desaparecerá após a barra estar completamente cheia.
-    setTimeout(() => {
-      loadingOverlay.style.opacity = '0';
-      
-      // Remove a tela de carregamento completamente do DOM após a transição
-      // para que ela não interfira mais na interação com a página.
-      setTimeout(() => {
-        loadingOverlay.style.display = 'none';
-      }, 870); // Este tempo deve ser igual à transição de opacidade do CSS
-      
-    }, 7000);
-  });
-</script><!--Api full screen deita tela-->
-<div id="overlay" style="
-  position:fixed;
-  top:0; left:0;
-  width:100vw; height:100vh;
-  background:transparent;
-  z-index:9999;
-  cursor:pointer;
-"></div>
-
-<script>
-  const overlay = document.getElementById("overlay");
-
-  function enterFullscreen() {
-    const elem = document.documentElement;
-    if (elem.requestFullscreen) {
-      elem.requestFullscreen();
-    } else if (elem.webkitRequestFullscreen) { /* Safari */
-      elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) { /* IE11 */
-      elem.msRequestFullscreen();
-    }
-  }
-
-  function lockScreenOrientation() {
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock('landscape').catch((err) => {
-        console.warn("Não foi possível bloquear a orientação da tela:", err);
-      });
-    } else {
-      console.warn("A API de orientação de tela não é suportada ou a permissão foi negada.");
-    }
-  }
-
-  overlay.addEventListener("click", () => {
-    overlay.style.display = "none";
-    enterFullscreen();
-    // Adicione um pequeno atraso para garantir que a tela cheia seja ativada
-    // antes de tentar alterar a orientação.
-    setTimeout(() => {
-      lockScreenOrientation();
-    }, 500);
-  });
-
-  document.addEventListener("fullscreenchange", () => {
-    if (!document.fullscreenElement) {
-      overlay.style.display = "block";
-    }
-  });
-
-</script>
-
 </body>
 </html>
