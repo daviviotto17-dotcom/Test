@@ -74,9 +74,11 @@
 
         .loading-bar-fill {
             height: 100%;
-            width: 100%;
+            /* AJUSTE: Começa em 0% e tem uma transição suave ao ser atualizada */
+            width: 0%; 
             background-color: #4CAF50;
             border-radius: 10px;
+            transition: width 0.3s linear; 
         }
     </style>
 </head>
@@ -122,7 +124,7 @@
         <div class="loading-container">
             <div class="loading-text">Carregando...</div>
             <div class="loading-bar-container">
-                <div class="loading-bar-fill"></div>
+                <div class="loading-bar-fill" id="customProgressBarFill"></div>
             </div>
         </div>
     </div>
@@ -141,7 +143,6 @@
         // --- FUNÇÕES DE UTILITY ---
 
         function ToggleFullScreen() {
-            // ... (mantido o código de tela cheia)
             var isInFullScreen = (document.fullscreenElement && document.fullscreenElement !== null) ||
                 (document.webkitFullscreenElement && document.webkitFullscreenElement !== null) ||
                 (document.msFullscreenElement && document.msFullscreenElement !== null);
@@ -168,7 +169,6 @@
         }
 
         function CheckCompatibility() {
-            // ... (mantido o código de compatibilidade)
             if (!hasWebGL()) {
                 document.getElementById("errorBrowserBlock").style.display = "inherit";
             } else if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
@@ -179,7 +179,6 @@
         }
 
         function hasWebGL() {
-            // ... (mantido o código de verificação WebGL)
             var supported;
             try {
                 var canvas = document.createElement('canvas');
@@ -197,7 +196,6 @@
             return supported;
         }
 
-        // Variáveis de checagem de browser
         var isFirefox = typeof InstallTrigger !== 'undefined';
         var isSafari = /constructor/i.test(window.HTMLElement) ||
             (function(p) {
@@ -213,20 +211,16 @@
         var isChrome = isIOSChrome ||
             (isChromium !== null && typeof isChromium !== "undefined" && vendorName === "Google Inc." && isOpera === false && isIEedge === false);
 
-        // --- VARIÁVEIS DE CONFIGURAÇÃO DE CARREGAMENTO (AJUSTADAS) ---
+        // --- VARIÁVEIS DE CONFIGURAÇÃO DE CARREGAMENTO ---
         
-        // Base URL do seu Build (usando a URL do seu primeiro código)
         var buildUrl = "https://cdn.jsdelivr.net/gh/daviviotto17-dotcom/Test@main"; 
-        
-        // O loaderUrl precisa ser ajustado para apontar para a raiz ou o local correto
-        // Mantendo a estrutura do seu primeiro código, mas com a URL completa:
-        var loaderUrl = "fb9502bc7610d9c812fd76745164ef27.js"; // Ele está na raiz
+        var loaderUrl = "fb9502bc7610d9c812fd76745164ef27.js";
         
         var config = {
-            dataUrl: "", // Será preenchido pela função loadDataFile()
+            dataUrl: "",
             frameworkUrl: "59f116a01ba156009be1331a920ead96.js.unityweb",
             codeUrl: "c04f87f256d6238c834e76a761d263d1.wasm.unityweb",
-            streamingAssetsUrl: "", // Usaremos o buildUrl na função loadDataFile
+            streamingAssetsUrl: "",
             companyName: "Gamebol",
             productName: "Ultimate Car Driving",
             productVersion: "1.0",
@@ -237,6 +231,8 @@
         var loadingBar = document.querySelector("#loadingBlock");
         var progressBarFull = document.querySelector("#fullBar");
         var progressBarEmpty = document.querySelector("#emptyBar");
+        // NOVA VARIÁVEL: Referência ao elemento de preenchimento da sua barra customizada
+        var customProgressBarFill = document.querySelector("#customProgressBarFill"); 
 
         if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
             container.className = "unity-mobile";
@@ -244,10 +240,9 @@
         }
         CheckCompatibility();
 
-        // --- FUNÇÕES DE CARREGAMENTO DE DADOS E DO JOGO (MODIFICADAS) ---
+        // --- FUNÇÕES DE CARREGAMENTO DE DADOS E DO JOGO (AJUSTADAS) ---
 
         async function loadDataFile() {
-            // As partes agora usam a URL base do seu build
             const parts = [
                 buildUrl + "/0aff4ee936778b905d874c8c2fb40213.data.unityweb.part1",
                 buildUrl + "/0aff4ee936778b905d874c8c2fb40213.data.unityweb.part2",
@@ -290,14 +285,13 @@
                  
                  // 2. Mostra o overlay de clique para iniciar o jogo/tela cheia
                  fullScreenOverlay.style.display = "block"; 
-             }, 870); // 870ms (tempo da sua transição de opacidade no CSS)
+             }, 870); 
         }
 
 
         async function loadGame() {
             await loadDataFile();
             
-            // O loaderUrl precisa da URL completa para funcionar
             var fullLoaderUrl = buildUrl + "/" + loaderUrl;
 
             var script = document.createElement("script");
@@ -307,8 +301,14 @@
                     // Atualiza a barra de progresso da Unity
                     progressBarFull.style.width = 100 * progress + "%";
                     progressBarEmpty.style.width = (100 * (1 - progress)) + "%";
+
+                    // >>> SINCRONIZAÇÃO AQUI: Atualiza a barra do SEU overlay customizado <<<
+                    if (customProgressBarFill) {
+                        customProgressBarFill.style.width = 100 * progress + "%";
+                    }
+
                 }).then((unityInstance) => {
-                    // >>> O JOGO DA UNITY TERMINOU DE CARREGAR AQUI! <<<
+                    // O JOGO DA UNITY TERMINOU DE CARREGAR AQUI!
                     
                     // Esconde a barra de progresso da Unity
                     loadingBar.style.display = "none"; 
@@ -355,7 +355,6 @@
             overlay.style.display = "none";
             enterFullscreen();
             
-            // Adiciona um pequeno atraso para garantir que a tela cheia seja ativada
             setTimeout(() => {
                 lockScreenOrientation();
             }, 500);
@@ -364,7 +363,6 @@
         // Listener para quando o usuário sai da tela cheia
         document.addEventListener("fullscreenchange", () => {
             if (!document.fullscreenElement) {
-                // Se sair da tela cheia, mostra o overlay de clique novamente
                 overlay.style.display = "block";
             }
         });
