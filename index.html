@@ -7,28 +7,28 @@
     <title>Ultimate Car Driving</title>
     <link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/daviviotto17-dotcom/Test@main/favicon.ico">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/daviviotto17-dotcom/Test@main/style.css">
-        <style>
+    <style>
         html, body {
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Evita barras de rolagem */
+            overflow: hidden;
         }
         .webgl-content {
-            width: 100vw;  /* Ocupa 100% da largura da tela */
-            height: 100vh; /* Ocupa 100% da altura da tela */
-            position: absolute; /* Posição absoluta para cobrir tudo */
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
             top: 0;
             left: 0;
-            display: flex; /* Garante que os filhos (gameContainer) se expandam */
+            display: flex;
             justify-content: center;
             align-items: center;
         }
         #gameContainer {
-            width: 100% !important; /* Ocupa 100% do contêiner pai */
-            height: 100% !important; /* Ocupa 100% do contêiner pai */
-            max-width: none !important; /* Remove qualquer limite de largura */
-            max-height: none !important; /* Remove qualquer limite de altura */
-            background: #000; /* Fundo preto para preencher o espaço */
+            width: 100% !important;
+            height: 100% !important;
+            max-width: none !important;
+            max-height: none !important;
+            background: #000;
         }
         #gameCanvas {
             width: 100% !important;
@@ -44,12 +44,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #f1f1f1; /* Cor de fundo da tela de carregamento */
+            background-color: #f1f1f1;
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            transition: opacity 0.87s ease-in-out; /* Tempo da transição para esconder */
+            transition: opacity 0.87s ease-in-out;
         }
 
         .loading-container {
@@ -64,23 +64,21 @@
             margin-bottom: 15px;
         }
 
-        /* Estilos para a barra de progresso */
         .loading-bar-container {
             width: 100%;
             height: 15px;
-            background-color: #ddd; /* Cor da barra vazia */
+            background-color: #ddd;
             border-radius: 10px;
             overflow: hidden;
         }
 
         .loading-bar-fill {
             height: 100%;
-            width: 100%; /* Definido como 100% para simular a barra cheia visualmente */
-            background-color: #4CAF50; /* Cor da barra cheia */
+            width: 100%;
+            background-color: #4CAF50;
             border-radius: 10px;
-            /* A animação 'fillBar' foi removida, pois a barra será escondida por script no momento certo */
         }
-        </style>
+    </style>
 </head>
 
 <body>
@@ -136,11 +134,14 @@
       background:transparent;
       z-index:9999;
       cursor:pointer;
-      display:none; /* Começa escondido. Será ativado após o jogo da Unity carregar. */
+      display:none; /* Começa escondido, só aparece após o jogo carregar */
     "></div>
 
     <script>
+        // --- FUNÇÕES DE UTILITY ---
+
         function ToggleFullScreen() {
+            // ... (mantido o código de tela cheia)
             var isInFullScreen = (document.fullscreenElement && document.fullscreenElement !== null) ||
                 (document.webkitFullscreenElement && document.webkitFullscreenElement !== null) ||
                 (document.msFullscreenElement && document.msFullscreenElement !== null);
@@ -167,6 +168,7 @@
         }
 
         function CheckCompatibility() {
+            // ... (mantido o código de compatibilidade)
             if (!hasWebGL()) {
                 document.getElementById("errorBrowserBlock").style.display = "inherit";
             } else if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
@@ -177,6 +179,7 @@
         }
 
         function hasWebGL() {
+            // ... (mantido o código de verificação WebGL)
             var supported;
             try {
                 var canvas = document.createElement('canvas');
@@ -194,6 +197,7 @@
             return supported;
         }
 
+        // Variáveis de checagem de browser
         var isFirefox = typeof InstallTrigger !== 'undefined';
         var isSafari = /constructor/i.test(window.HTMLElement) ||
             (function(p) {
@@ -209,13 +213,20 @@
         var isChrome = isIOSChrome ||
             (isChromium !== null && typeof isChromium !== "undefined" && vendorName === "Google Inc." && isOpera === false && isIEedge === false);
 
-        var buildUrl = "";
-        var loaderUrl = "fb9502bc7610d9c812fd76745164ef27.js";
+        // --- VARIÁVEIS DE CONFIGURAÇÃO DE CARREGAMENTO (AJUSTADAS) ---
+        
+        // Base URL do seu Build (usando a URL do seu primeiro código)
+        var buildUrl = "https://cdn.jsdelivr.net/gh/daviviotto17-dotcom/Test@main"; 
+        
+        // O loaderUrl precisa ser ajustado para apontar para a raiz ou o local correto
+        // Mantendo a estrutura do seu primeiro código, mas com a URL completa:
+        var loaderUrl = "fb9502bc7610d9c812fd76745164ef27.js"; // Ele está na raiz
+        
         var config = {
-            dataUrl: "",
+            dataUrl: "", // Será preenchido pela função loadDataFile()
             frameworkUrl: "59f116a01ba156009be1331a920ead96.js.unityweb",
             codeUrl: "c04f87f256d6238c834e76a761d263d1.wasm.unityweb",
-            streamingAssetsUrl: "",
+            streamingAssetsUrl: "", // Usaremos o buildUrl na função loadDataFile
             companyName: "Gamebol",
             productName: "Ultimate Car Driving",
             productVersion: "1.0",
@@ -232,16 +243,17 @@
             config.devicePixelRatio = 1;
         }
         CheckCompatibility();
-        
+
         // --- FUNÇÕES DE CARREGAMENTO DE DADOS E DO JOGO (MODIFICADAS) ---
 
         async function loadDataFile() {
+            // As partes agora usam a URL base do seu build
             const parts = [
-                "0aff4ee936778b905d874c8c2fb40213.data.unityweb.part1",
-                "0aff4ee936778b905d874c8c2fb40213.data.unityweb.part2",
-                "0aff4ee936778b905d874c8c2fb40213.data.unityweb.part3",
-                "0aff4ee936778b905d874c8c2fb40213.data.unityweb.part4",
-                "0aff4ee936778b905d874c8c2fb40213.data.unityweb.part5"
+                buildUrl + "/0aff4ee936778b905d874c8c2fb40213.data.unityweb.part1",
+                buildUrl + "/0aff4ee936778b905d874c8c2fb40213.data.unityweb.part2",
+                buildUrl + "/0aff4ee936778b905d874c8c2fb40213.data.unityweb.part3",
+                buildUrl + "/0aff4ee936778b905d874c8c2fb40213.data.unityweb.part4",
+                buildUrl + "/0aff4ee936778b905d874c8c2fb40213.data.unityweb.part5"
             ];
 
             let buffers = [];
@@ -265,7 +277,7 @@
 
         /**
          * Esconde o seu overlay customizado e mostra o overlay de clique para tela cheia.
-         * Isso é chamado quando a Unity termina o carregamento.
+         * Chamada EXATAMENTE quando o jogo da Unity está pronto.
          */
         function hideLoadingOverlayAndStartGame() {
              const loadingOverlay = document.getElementById('loadingOverlay');
@@ -278,15 +290,18 @@
                  
                  // 2. Mostra o overlay de clique para iniciar o jogo/tela cheia
                  fullScreenOverlay.style.display = "block"; 
-             }, 870); // Este tempo deve ser igual à transição de opacidade do CSS (0.87s)
+             }, 870); // 870ms (tempo da sua transição de opacidade no CSS)
         }
 
 
         async function loadGame() {
             await loadDataFile();
+            
+            // O loaderUrl precisa da URL completa para funcionar
+            var fullLoaderUrl = buildUrl + "/" + loaderUrl;
 
             var script = document.createElement("script");
-            script.src = loaderUrl;
+            script.src = fullLoaderUrl;
             script.onload = () => {
                 createUnityInstance(canvas, config, (progress) => {
                     // Atualiza a barra de progresso da Unity
@@ -310,15 +325,17 @@
 
         loadGame(); // Inicia o carregamento do jogo
 
-        // --- FUNÇÕES DE TELA CHEIA E ORIENTAÇÃO (MODIFICADAS) ---
+        // --- FUNÇÕES DE TELA CHEIA E ORIENTAÇÃO ---
+
+        const overlay = document.getElementById("overlay");
 
         function enterFullscreen() {
             const elem = document.documentElement;
             if (elem.requestFullscreen) {
                 elem.requestFullscreen();
-            } else if (elem.webkitRequestFullscreen) { /* Safari */
+            } else if (elem.webkitRequestFullscreen) {
                 elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) { /* IE11 */
+            } else if (elem.msRequestFullscreen) {
                 elem.msRequestFullscreen();
             }
         }
