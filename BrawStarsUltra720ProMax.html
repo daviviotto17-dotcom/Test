@@ -33,7 +33,7 @@
             background: rgba(255,255,255,0.05); border: 3px solid #555; width: 110px; padding: 20px; 
             border-radius: 15px; cursor: pointer; text-align: center; transition: 0.3s;
         }
-        .card:hover, .card.selected { border-color: #ffca28; background: rgba(255,202,40,0.15); transform: scale(1.1); box-shadow: 0 0 20px rgba(255,202,40,0.3); }
+        .card:active { border-color: #ffca28; background: rgba(255,202,40,0.15); transform: scale(0.95); }
         .card h3 { margin: 0 0 10px 0; font-family: 'Black Ops One'; font-size: 20px; }
         .card p { margin: 0; font-size: 13px; color: #ccc; font-weight: bold; }
         
@@ -51,26 +51,31 @@
 </head>
 <body>
 
-<div id="startScreen" class="screen">
+<div id="homeScreen" class="screen">
     <h1>Survival.io</h1>
-    <h2 style="color: #ffca28; font-family: 'Black Ops One'; margin-bottom:0px; font-size:24px;">Battle royale</h2>
-    <div style="color:#aaa; margin-bottom:15px; font-size:18px;">ESCOLHA SEU AGENTE</div>
+    <h2 style="color: #ffca28; font-family: 'Black Ops One'; margin-bottom:40px; font-size:24px;">Battle royale</h2>
+    <button class="btn-action" onclick="goToSelection()">BATALHAR</button>
+</div>
+
+<div id="selectionScreen" class="screen" style="display:none;">
+    <h1>ESCOLHA SEU AGENTE</h1>
+    <div style="color:#aaa; margin-bottom:15px; font-size:18px;">Toque no card para iniciar</div>
     <div class="brawler-select">
-        <div class="card selected" onclick="selectBrawler('shelly', this)" style="border-color:#f06292">
+        <div class="card" onclick="selectAndStart('shelly')" style="border-color:#f06292">
             <h3 style="color:#f06292">SHELLY</h3>
             <p>Vida: 4000</p>
             <p>Dano: 340</p>
             <p>Escopeta</p>
             <p>Alcance: Médio</p>
         </div>
-        <div class="card" onclick="selectBrawler('colt', this)" style="border-color:#4dd0e1">
+        <div class="card" onclick="selectAndStart('colt')" style="border-color:#4dd0e1">
             <h3 style="color:#4dd0e1">COLT</h3>
             <p>Vida: 3200</p>
             <p>Dano: 850</p>
             <p>Sniper</p>
             <p>Alcance: Super longo</p>
         </div>
-        <div class="card" onclick="selectBrawler('bull', this)" style="border-color:#ffb74d">
+        <div class="card" onclick="selectAndStart('bull')" style="border-color:#ffb74d">
             <h3 style="color:#ffb74d">BULL</h3>
             <p>Vida: 4000</p>
             <p>Dano: 400</p>
@@ -78,7 +83,7 @@
             <p>Alcance: Curto</p>
         </div>
     </div>
-    <button class="btn-action" onclick="startGame()">Batalhar</button>
+    <button class="btn-action" style="background:#d32f2f; padding:10px 30px; font-size:20px;" onclick="location.reload()">Voltar</button>
 </div>
 
 <div id="pauseMenu" class="screen">
@@ -111,25 +116,11 @@ const ctx = cvs.getContext('2d');
 cvs.width = window.innerWidth;
 cvs.height = window.innerHeight;
 
-// --- CONFIGURAÇÃO ---
 const BRAWLERS = {
     shelly: { hp: 4000, speed: 6.5, bullets: 5, spread: 0.35, range: 40, reload: 45, dmg: 340, color: "#f06292" },
-    colt:   { hp: 3200, speed: 7.5, bullets: 1, spread: 0.02, range: 75, reload: 25, dmg: 850, color: "#4dd0e1" }, // Alcance aumentado
+    colt:   { hp: 3200, speed: 7.5, bullets: 1, spread: 0.02, range: 75, reload: 25, dmg: 850, color: "#4dd0e1" }, 
     bull:   { hp: 6000, speed: 7.0, bullets: 5, spread: 0.45, range: 25, reload: 50, dmg: 400, color: "#ffb74d" }
 };
-
-// --- CONTROLES PC ---
-const keys = {};
-let mousePos = {x: 0, y: 0};
-window.addEventListener('keydown', e => keys[e.code] = true);
-window.addEventListener('keyup', e => keys[e.code] = false);
-window.addEventListener('mousemove', e => {
-    mousePos.x = e.clientX;
-    mousePos.y = e.clientY;
-});
-window.addEventListener('mousedown', e => {
-    if(gameActive && !paused && e.button === 0) player.shoot();
-});
 
 const MAPS = [
     {   color: "#795548", wallColor: "#4e342e", bushColor: "#8d6e63",
@@ -182,7 +173,6 @@ const TILE = 120;
 let walls=[], bushes=[], boxes=[], spawns=[];
 let MAP_W, MAP_H;
 let selectedBrawler = 'shelly';
-
 let gameActive = false, paused = false;
 let entities = [], bullets = [], particles = [], drops = [];
 let player = null;
@@ -279,28 +269,15 @@ class Brawler {
 
         let mx = 0, my = 0;
         if(this.isPlayer) {
-            // Teclado PC
-            if(keys['KeyW'] || keys['ArrowUp']) my = -this.speed;
-            if(keys['KeyS'] || keys['ArrowDown']) my = this.speed;
-            if(keys['KeyA'] || keys['ArrowLeft']) mx = -this.speed;
-            if(keys['KeyD'] || keys['ArrowRight']) mx = this.speed;
-
-            // Joystick Mobile (Prioridade)
             if(joyMove.active) {
                 mx = joyMove.x * this.speed; 
                 my = joyMove.y * this.speed;
             }
-
-            // Mira (Mouse ou Joystick)
             if(joyShoot.active) {
                 this.angle = Math.atan2(joyShoot.y, joyShoot.x);
-            } else if (!joyMove.active) {
-                // Mira no mouse em relação ao player no canvas
-                this.angle = Math.atan2(mousePos.y - (this.y - cam.y), mousePos.x - (this.x - cam.x));
-            } else if (mx !== 0 || my !== 0) {
+            } else if (joyMove.active) {
                 this.angle = Math.atan2(my, mx);
             }
-
         } else {
             this.runAI();
             mx = Math.cos(this.moveDir) * this.aiSpeed;
@@ -337,7 +314,6 @@ class Brawler {
             return true;
         };
 
-        // IA agora tem um campo de busca maior (1200)
         if(!this.target || this.target.dead || !canSee(this.target)) {
             this.target = entities.find(e => e !== this && !e.dead && canSee(e) && dist(this.x, this.y, e.x, e.y) < 1200);
             if(!this.target) this.target = boxes.find(b => !b.dead && dist(this.x, this.y, b.x, b.y) < 800 && hasLOS(this.x, this.y, b.x, b.y));
@@ -349,15 +325,12 @@ class Brawler {
             
             if(hasLOS(this.x, this.y, this.target.x, this.target.y)) {
                 this.angle = a;
-                // Atira de longe se tiver munição
                 let ideal = (this.type === 'bull') ? 120 : (this.type === 'colt' ? 600 : 300);
                 
-                if(d > ideal) {
-                    this.moveDir = a; this.aiSpeed = this.speed;
-                } else {
-                    this.aiSpeed = this.speed * 0.3; // Anda devagar enquanto atira
-                    if(this.ammo > 0 && Math.random() < 0.1) this.shoot();
-                }
+                // IA AGORA ATIRA E SE MOVE EM VELOCIDADE TOTAL
+                this.moveDir = a;
+                this.aiSpeed = this.speed; 
+                if(this.ammo > 0 && Math.random() < 0.1) this.shoot();
             } else {
                 this.aiSpeed = this.speed;
                 if(this.decisionTimer <= 0) {
@@ -457,14 +430,18 @@ function checkWall(x,y) {
     return false;
 }
 
-function selectBrawler(type, el) {
+function goToSelection() {
+    document.getElementById('homeScreen').style.display = 'none';
+    document.getElementById('selectionScreen').style.display = 'flex';
+}
+
+function selectAndStart(type) {
     selectedBrawler = type;
-    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
+    document.getElementById('selectionScreen').style.display = 'none';
+    startGame();
 }
 
 function startGame() {
-    document.getElementById('startScreen').style.display = 'none';
     document.getElementById('ui-layer').style.display = 'block';
     currentMap = MAPS[0];
     walls=[]; bushes=[]; boxes=[]; spawns=[]; entities=[]; drops=[]; bullets=[]; particles=[];
