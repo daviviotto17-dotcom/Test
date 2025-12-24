@@ -90,7 +90,7 @@ let currentSkin = "steve";
 let abilityReady = true;
 let blocksLeftToPlace = 0;
 let lastUsedDist = 0;
-const RECHARGE_DIST = 1; 
+const RECHARGE_DIST = 0; 
 const BLOCKS_PER_USE = 9999999999999999999999999999999999999999;
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -101,7 +101,7 @@ function playCoinSound() {
     osc.start(); osc.stop(audioCtx.currentTime + 0.1);
 }
 
-const GRAV_UP = 0.7, GRAV_DOWN = 0.82, JUMP_FORCE = -16.6, SPEED = 6.5;
+const GRAV_UP = 0.7, GRAV_DOWN = 0.82, JUMP_FORCE = -16.6, SPEED = 999999999999999999999999995;
 const player = { x: 100, y: 0, w: 32, h: 60, vx: 0, vy: 0, onGround: false };
 const input = { left: false, right: false };
 
