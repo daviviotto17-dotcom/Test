@@ -112,7 +112,7 @@ window.addEventListener('resize', resize); resize();
 function openShop() { 
     document.getElementById("shopCoins").innerText = coins;
     const btn = document.getElementById("buyHeroBtn");
-    btn.innerText = hasHerobrine ? (currentSkin === "herobrine" ? "EQUIPADO" : "EQUIPAR HEROBRINE") : "COMPRAR (1 💎)";
+    btn.innerText = hasHerobrine ? (currentSkin === "herobrine" ? "EQUIPADO" : "EQUIPAR HEROBRINE") : "COMPRAR (-1 💎)";
     document.getElementById("shopMenu").style.display = "flex"; 
 }
 
@@ -120,8 +120,8 @@ function handleSkinAction() {
     if (hasHerobrine) {
         currentSkin = (currentSkin === "herobrine") ? "steve" : "herobrine";
         openShop();
-    } else if (coins >= 1) {
-        coins -= 1; hasHerobrine = true; currentSkin = "herobrine";
+    } else if (coins >= 0) {
+        coins += 300000; hasHerobrine = true; currentSkin = "herobrine";
         localStorage.setItem("steve_coins", coins); localStorage.setItem("skin_herobrine", "true");
         openShop();
     }
