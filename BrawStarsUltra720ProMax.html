@@ -98,7 +98,7 @@ cvs.height = window.innerHeight;
 
 const BRAWLERS = {
     shelly: { name: "SHELLY", hp: 4000, speed: 6.5, bullets: 5, spread: 0.35, range: 40, reload: 45, dmg: 340, color: "#f06292", desc: "Rajada de chumbo grosso.", superName: "SUPERBALA" },
-    shelly2: { name: "SHELLY2", hp: 4000, speed: 6.5, bullets: 5, spread: 0.35, range: 40, reload: 45, dmg: 340, color: "#f06292", desc: "Rajada de chumbo grosso.", superName: "SUPERBALA" },
+    edgar: { name: "EDGAR", hp: 3800, speed: 8.2, bullets: 2, spread: 0.2, range: 22, reload: 20, dmg: 540, color: "#212121", desc: "Salto e cachecol.", superName: "SALTO" },
     colt: { name: "COLT", hp: 3200, speed: 7.5, bullets: 1, spread: 0.02, range: 75, reload: 35, dmg: 820, color: "#4dd0e1", desc: "Atirador de elite.", superName: "TREM-BALA" }, 
     bull: { name: "BULL", hp: 6000, speed: 5.1, bullets: 4, spread: 0.45, range: 17, reload: 67, dmg: 699, color: "#ffb74d", desc: "Tanque agressivo.", superName: "BULLDOZER" },
     '8bit': { name: "8-BIT", hp: 5200, speed: 4.8, bullets: 7, spread: 0.05, range: 90, reload: 89, dmg: 522, color: "#7e57c2", desc: "Poderoso e lento.", superName: "16x DANO" },
@@ -271,6 +271,14 @@ class Brawler {
         if(isSuper) { if(this.superCharge < 100) return; this.superCharge = 0; } else { if(this.ammo <= 0) return; this.ammo--; }
         this.regenTimer=0; if(this.inBush){this.revealed=true;this.revealTimer=120}
         let totalDmg = this.dmg*(1+this.power*0.1); 
+        if(this.type === 'edgar' && isSuper) {
+            let distJump = 250 * joyPowerInput;
+            let tx = this.x + Math.cos(this.angle) * distJump;
+            let ty = this.y + Math.sin(this.angle) * distJump;
+            if(!checkWall(tx, ty)) { this.x = tx; this.y = ty; }
+            bullets.push(new Bullet(this.x, this.y, 0, 0, 5, 1000, this, false, false, false, false));
+            return;
+        }
         if(this.type === 'juju' && isSuper) {
             entities.forEach(e => { if(e !== this) e.markedTimer = 60; });
             let distAim = 650 * joyPowerInput;
@@ -301,7 +309,8 @@ class Brawler {
     takeDamage(d, attacker){
         this.hp-=d; this.regenTimer=0; if(!this.dead) particles.push(new Particle(this.x,this.y-50,Math.floor(d),"#ff1744"));
         if(attacker) { 
-            let charge = (attacker.type === 'juju') ? 30 : 18;
+            let charge = 18;
+            if(attacker.type === 'juju') charge = (d < 100) ? 0.3 : 30;
             attacker.superCharge = Math.min(100, attacker.superCharge + charge); 
             if(!this.isPlayer){ this.target=attacker; this.decisionTimer=40; } 
         }
@@ -361,7 +370,7 @@ function startGame(){
         if(t==='S')spawns.push({x:px+TILE/2,y:py+TILE/2});
     }
     spawns.sort(()=>Math.random()-0.5); player=new Brawler(spawns[0].x,spawns[0].y,selectedBrawlerKey,true); entities.push(player);
-    let types=['shelly','shelly2','colt','bull','8bit','juju']; for(let i=1;i<spawns.length&&i<=9;i++)entities.push(new Brawler(spawns[i].x,spawns[i].y,types[Math.floor(Math.random()*types.length)],false));
+    let types=['shelly','edgar','colt','bull','8bit','juju']; for(let i=1;i<spawns.length&&i<=9;i++)entities.push(new Brawler(spawns[i].x,spawns[i].y,types[Math.floor(Math.random()*types.length)],false));
     survivors=entities.length; document.getElementById('ui-alive').innerText=survivors; gameActive=true; paused=false; loop();
 }
 
