@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Brawl Elite: Edgar Update</title>
+    <title>Brawl Elite: Ultimate</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Roboto:wght@700&display=swap');
         body { margin: 0; overflow: hidden; background: #0d0d0d; font-family: 'Roboto', sans-serif; touch-action: none; user-select: none; }
@@ -98,9 +98,10 @@ cvs.height = window.innerHeight;
 
 const BRAWLERS = {
     shelly: { name: "SHELLY", hp: 4000, speed: 6.5, bullets: 5, spread: 0.35, range: 40, reload: 45, dmg: 340, color: "#f06292", desc: "Rajada de chumbo grosso.", superName: "SUPERBALA" },
+    shelly2: { name: "SHELLY2", hp: 4000, speed: 6.5, bullets: 5, spread: 0.35, range: 40, reload: 45, dmg: 340, color: "#f06292", desc: "Rajada de chumbo grosso.", superName: "SUPERBALA" },
     colt: { name: "COLT", hp: 3200, speed: 7.5, bullets: 1, spread: 0.02, range: 75, reload: 35, dmg: 820, color: "#4dd0e1", desc: "Atirador de elite.", superName: "TREM-BALA" }, 
     bull: { name: "BULL", hp: 6000, speed: 5.1, bullets: 4, spread: 0.45, range: 17, reload: 67, dmg: 699, color: "#ffb74d", desc: "Tanque agressivo.", superName: "BULLDOZER" },
-    edgar: { name: "EDGAR", hp: 3300, speed: 8.2, bullets: 2, spread: 0.2, range: 12, reload: 25, dmg: 540, color: "#311b92", desc: "Ataque veloz com cura. Super recarrega sozinho.", superName: "GRANDE SALTO" },
+    '8bit': { name: "8-BIT", hp: 5200, speed: 4.8, bullets: 7, spread: 0.05, range: 90, reload: 89, dmg: 522, color: "#7e57c2", desc: "Poderoso e lento.", superName: "16x DANO" },
     juju: { name: "JUJU", hp: 3800, speed: 6.8, bullets: 1, spread: 0.0, range: 650, reload: 55, dmg: 1400, color: "#76ff03", desc: "Magia de área. Super: Aura do Vazio.", superName: "O VAZIO", isLobber: true }
 };
 
@@ -132,17 +133,14 @@ function buildGrid() {
 function renderMenuChar(canvasId, key) { const c = document.getElementById(canvasId); renderMenuCharCtx(c.getContext('2d'), key, c.width/2, c.height/2); }
 function renderMenuCharCtx(ctx, key, x, y) {
     const b = BRAWLERS[key]; ctx.clearRect(0,0,200,200); ctx.save(); ctx.translate(x, y);
-    if(key === 'edgar') {
-        ctx.fillStyle = "#111"; ctx.fillRect(-25,-30,50,10); // Cachecol
-        ctx.fillStyle = "#311b92"; ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = "#000"; ctx.fillRect(-15, -20, 30, 15); // Cabelo emo
-    } else {
-        ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(-15, -15, 10, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(-15, 15, 10, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = b.color; ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI*2); ctx.fill();
-    }
-    ctx.restore();
+    ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(-15, -15, 10, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(-15, 15, 10, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = b.color; ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = "rgba(0,0,0,0.3)"; ctx.fillRect(-13, -20, 26, 40);
+    ctx.fillStyle = "#f5c6a5"; ctx.beginPath(); ctx.arc(15, -12, 9, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(25, 12, 9, 0, Math.PI*2); ctx.fill(); 
+    ctx.fillStyle = "#333"; ctx.fillRect(10, 4, 60, 8); ctx.fillStyle = "#5d4037"; ctx.fillRect(10, 4, 35, 8); ctx.fillRect(0, 4, 10, 14); ctx.fillStyle = "#000"; ctx.fillRect(40, 10, 10, 14);
+    ctx.fillStyle = "#1565c0"; ctx.beginPath(); ctx.arc(0, 0, 19, 0, Math.PI*2); ctx.fill(); ctx.restore();
 }
 
+const MAPS = [{ color: "#795548", wallColor: "#4e342e", bushColor: "#8d6e63", grid: ["WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW","WS...C...W.......C.......W...C.......SW","W.........W...MMMMMMM...W.............W","W...MM....C...MMMMMMM...C....MM.......W","W...MM.......................MM.......W","W.........WWC..........WW.............W","W...C.....WW......C....WW.............W","W.....................................W","W...C..........WW.WW..........C.......W","W..............W...W..................W","W.....C........W...W..................W","W..............W...W..................W","W...WWWW.......W...W.......WWWW.......W","W...W..........W...W..........W.......W","W...W...C......MMMMM......C...W.......W","W...W............C............W.......W","W...W.........................W.......W","W.............WMMMMMW.................W","W............CWMMMMMW...........C.....W","W.....C.......WMMMMMW.................W","W............CWMMMMMWC................W","W.............WMMMMMW.................W","W...W.........................W.......W","W...W.........................W.......W","W...W...C......MMMMM......C...W.......W","W...W..........W...W..........W.......W","W...WWWW.......W...W.......WWWW.......W","WS............CW.S.WC.................SW","W..............W...W..................W","W..............W...W..................W","W...C..........WW.WW..........C.......W","W.....................................W","W.........WW...........WW.............W","W.........WW...........WW.............W","W...MM....C.............C....MM.......W","W...MM........MMMMMMM........MM.......W","W.........W...MMMMMMM...W.............W","WS...C...W...............W...C.......SW","WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW","WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"] }];
 const TILE = 120;
 let walls=[], bushes=[], boxes=[], spawns=[], entities=[], bullets=[], particles=[], drops=[];
 let player=null, cam={x:0, y:0}, gameActive=false, paused=false, survivors=0, gasRadius=0, currentMap=null;
@@ -153,49 +151,58 @@ const joySuper={x:0, y:0, active:false, id:'j-super', stick:'stick-super', power
 class Particle { constructor(x,y,t,c){this.x=x;this.y=y;this.text=t;this.color=c;this.life=50;this.vy=-2} update(){this.y+=this.vy;this.life--} draw(){ctx.globalAlpha=this.life/50;ctx.fillStyle=this.color;ctx.font="bold 28px 'Black Ops One'";ctx.strokeStyle="black";ctx.lineWidth=4;ctx.strokeText(this.text,this.x,this.y);ctx.fillText(this.text,this.x,this.y);ctx.globalAlpha=1} }
 
 class Bullet {
-    constructor(x,y,a,s,l,d,o, wallBuster=false, lobber=false, isAura=false, isPunch=false){
+    constructor(x,y,a,s,l,d,o, wallBuster=false, lobber=false, missile=false, isAura=false){
         this.x=x;this.y=y;this.angle = a; this.speed = s;
         this.vx=Math.cos(a)*s;this.vy=Math.sin(a)*s;
         this.life=l;this.maxLife=l;this.dmg=d;this.owner=o;
-        this.wallBuster=wallBuster;this.isLobber=lobber;
-        this.isAura = isAura; this.isPunch = isPunch;
+        this.wallBuster=wallBuster;this.isLobber=lobber;this.isMissile=missile;
+        this.isAura = isAura;
     }
     update(){
         if(this.isAura) {
-            this.life--; for(let e of entities) if(e !== this.owner && !e.dead && dist(this.x, this.y, e.x, e.y) < 250) e.takeDamage(this.dmg, this.owner);
+            this.life--;
+            for(let e of entities) {
+                if(e !== this.owner && !e.dead && dist(this.x, this.y, e.x, e.y) < 250) {
+                    e.takeDamage(this.dmg, this.owner);
+                }
+            }
             return;
         }
         this.x+=this.vx;this.y+=this.vy;this.life--;
-        if(checkWall(this.x,this.y) && !this.isLobber){ this.life=0; return; }
-        if(this.isLobber && this.life <= 0) { this.explode(); return; }
-        
-        for(let b of boxes){
-            if(!b.dead && dist(this.x,this.y,b.x,b.y)<60){
-                b.hp-=this.dmg; 
-                if(this.isPunch) this.owner.hp = Math.min(this.owner.maxHp, this.owner.hp + this.dmg * 0.35); // Edgar Cura
-                this.life=0; return;
-            }
+        if(checkWall(this.x,this.y)){ 
+            if(this.wallBuster) { this.explode(); this.life = 0; return; }
+            if(!this.isLobber) { this.life=0; return; }
         }
-        for(let e of entities){
-            if(e!==this.owner && !e.dead && dist(this.x,this.y,e.x,e.y)<45){
-                e.takeDamage(this.dmg,this.owner);
-                if(this.isPunch) {
-                    this.owner.hp = Math.min(this.owner.maxHp, this.owner.hp + this.dmg * 0.35); // Edgar Cura
-                    particles.push(new Particle(this.owner.x, this.owner.y - 30, "+HP", "#00e676"));
-                }
-                this.life=0; return;
-            }
-        }
+        if(this.isLobber) { if(this.life <= 0) { this.explode(); return; } return; }
+        for(let b of boxes){if(!b.dead && dist(this.x,this.y,b.x,b.y)<60){b.hp-=this.dmg; if(!this.wallBuster) { this.life=0; return; }}}
+        for(let e of entities){if(e!==this.owner && !e.dead && dist(this.x,this.y,e.x,e.y)<45){e.takeDamage(this.dmg,this.owner); if(!this.wallBuster) { this.life=0; return; }}}
     }
     explode() {
+        particles.push(new Particle(this.x,this.y,"BUM!","#76ff03"));
+        if(this.wallBuster) {
+            for(let i=walls.length-1; i>=0; i--) {
+                let w = walls[i]; if(!w.isBorder && dist(this.x,this.y, w.x+TILE/2, w.y+TILE/2) < 160) walls.splice(i, 1);
+            }
+        }
         let radius = (this.owner.type === 'juju') ? 160 : 130;
-        for(let b of boxes) if(!b.dead && dist(this.x,this.y,b.x,b.y)<radius){b.hp-=this.dmg;if(b.hp<=0){b.dead=true;drops.push({x:b.x,y:b.y})}}
-        for(let e of entities) if(e!==this.owner && !e.dead && dist(this.x,this.y,e.x,e.y)<radius-20) e.takeDamage(this.dmg,this.owner);
+        for(let b of boxes){if(!b.dead && dist(this.x,this.y,b.x,b.y)<radius){b.hp-=this.dmg;if(b.hp<=0){b.dead=true;drops.push({x:b.x,y:b.y})}}}
+        for(let e of entities){if(e!==this.owner && !e.dead && dist(this.x,this.y,e.x,e.y)<radius-20) e.takeDamage(this.dmg,this.owner);}
     }
-    draw(){
-        if(this.isAura) { ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.beginPath(); ctx.arc(this.x, this.y, 250, 0, Math.PI*2); ctx.fill(); return; }
-        ctx.fillStyle = this.isPunch ? "#311b92" : "#ffff00";
-        ctx.beginPath(); ctx.arc(this.x,this.y,this.isPunch?12:8,0,Math.PI*2); ctx.fill();
+    draw(){ 
+        if(this.isAura) {
+            ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.beginPath(); ctx.arc(this.x, this.y, 250, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = "#444"; ctx.lineWidth = 5; ctx.stroke();
+            return;
+        }
+        if(this.isLobber) {
+            let progress = 1 - (this.life / this.maxLife);
+            let height = Math.sin(progress * Math.PI) * 140;
+            ctx.fillStyle = "rgba(0,0,0,0.3)"; ctx.beginPath(); ctx.ellipse(this.x, this.y, 14, 7, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = "#76ff03"; ctx.strokeStyle = "#1b5e20"; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(this.x, this.y - height, 16 + (height/7), 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        } else {
+            ctx.fillStyle=this.wallBuster?"#ffa000":"#ffff00"; ctx.beginPath(); ctx.arc(this.x,this.y,this.wallBuster?15:8,0,Math.PI*2); ctx.fill(); 
+        }
     }
 }
 
@@ -204,129 +211,174 @@ class Brawler {
         this.x=x;this.y=y;this.isPlayer=isP;this.type=t;const s=BRAWLERS[t];
         this.maxHp=isP?s.hp:Math.floor(s.hp*1.4);this.hp=this.maxHp;this.speed=s.speed;this.dmg=isP?s.dmg:Math.floor(s.dmg*1.2);
         this.reloadTime=s.reload;this.bullets=s.bullets;this.spread=s.spread;this.rangeMult=s.range;this.baseColor=s.color;
-        this.angle=0;this.power=0;this.ammo=3;this.reloadTimer=0;this.dead=false;this.inBush=false;this.revealed=false;this.revealTimer=0;this.regenTimer=0;this.target=null;this.moveDir=0;this.aiSpeed=0;this.superCharge = 0;
+        this.angle=0;this.power=0;this.ammo=3;this.reloadTimer=0;this.dead=false;this.inBush=false;this.revealed=false;this.revealTimer=0;this.regenTimer=0;this.target=null;this.decisionTimer=0;this.moveDir=0;this.aiSpeed=0;this.superCharge = 0;
         this.isLobber = s.isLobber || false; this.markedTimer = 0;
-        this.isJumping = false; this.jumpTime = 0; this.speedBoost = 0;
     }
     update(){
         if(this.dead)return;
-        if(this.type === 'edgar') this.superCharge = Math.min(100, this.superCharge + 0.1); // Carregamento Auto
-        if(this.speedBoost > 0) this.speedBoost--;
         if(this.markedTimer > 0) this.markedTimer--;
-        if(this.ammo<3){this.reloadTimer++;if(this.reloadTimer>Math.max(10,this.reloadTime-this.power)){this.ammo++;this.reloadTimer=0}}
+        if(this.ammo<3){this.reloadTimer++;if(this.reloadTimer>Math.max(20,this.reloadTime-this.power*2)){this.ammo++;this.reloadTimer=0}}
         if(this.revealed){this.revealTimer--;if(this.revealTimer<=0)this.revealed=false}
-        this.regenTimer++; if(this.regenTimer > 180) this.hp = Math.min(this.maxHp, this.hp + 80);
-
-        let mx=0,my=0;
-        if(this.isJumping) {
-            this.jumpTime--;
-            mx = Math.cos(this.angle) * 15; my = Math.sin(this.angle) * 15;
-            this.x += mx; this.y += my;
-            if(this.jumpTime <= 0) { this.isJumping = false; this.speedBoost = 120; }
-            return;
+        this.regenTimer++;
+        if(this.regenTimer > 120) {
+            let heal = this.inBush ? 100 : 60;
+            this.hp = Math.min(this.maxHp, this.hp + heal);
         }
-
+        let mx=0,my=0;
         if(this.isPlayer){
-            let curSpeed = this.speed + (this.speedBoost > 0 ? 3 : 0);
-            if(joyMove.active){mx=joyMove.x*curSpeed;my=joyMove.y*curSpeed}
-            if(joyShoot.active || joySuper.active) this.angle = Math.atan2(joyShoot.active?joyShoot.y:joySuper.y, joyShoot.active?joyShoot.x:joySuper.x);
+            if(joyMove.active){mx=joyMove.x*this.speed;my=joyMove.y*this.speed}
+            if(joySuper.active && this.superCharge >= 100) this.angle = Math.atan2(joySuper.y, joySuper.x);
+            else if(joyShoot.active) this.angle = Math.atan2(joyShoot.y, joyShoot.x);
+            else if(joyMove.active) this.angle = Math.atan2(my,mx);
+            const btnSuper = document.getElementById('j-super'); const notify = document.getElementById('super-notify');
+            if(this.superCharge >= 100) { btnSuper.classList.add('super-ready'); notify.style.display = 'block'; } else { btnSuper.classList.remove('super-ready'); notify.style.display = 'none'; }
         } else { this.runAI(); mx=Math.cos(this.moveDir)*this.aiSpeed; my=Math.sin(this.moveDir)*this.aiSpeed; }
-        
-        if(!checkWall(this.x+mx,this.y))this.x+=mx; if(!checkWall(this.x,this.y+my))this.y+=my;
-        this.inBush=false;for(let b of bushes)if(this.x>b.x && this.x<b.x+TILE && this.y>b.y && this.y<b.y+TILE)this.inBush=true;
-        for(let i=drops.length-1;i>=0;i--)if(dist(this.x,this.y,drops[i].x,drops[i].y)<60){this.power++;this.maxHp+=400;this.hp+=400;drops.splice(i,1);if(this.isPlayer)document.getElementById('ui-power').innerText=this.power}
+        if(!checkWall(this.x+mx,this.y))this.x+=mx;if(!checkWall(this.x,this.y+my))this.y+=my;
+        this.inBush=false;for(let b of bushes)if(this.x>b.x && this.x<b.x+TILE && this.y>b.y && this.y<b.y+TILE){this.inBush=true;break}
+        for(let i=drops.length-1;i>=0;i--)if(dist(this.x,this.y,drops[i].x,drops[i].y)<60){this.power++;this.hp=Math.min(this.hp+400,this.maxHp+400);this.maxHp+=400;drops.splice(i,1);if(this.isPlayer)document.getElementById('ui-power').innerText=this.power}
+        if(dist(this.x,this.y,MAP_W/2,MAP_H/2)>gasRadius)this.takeDamage(35,null);
     }
     runAI(){
-        let dCenter = dist(this.x, this.y, MAP_W/2, MAP_H/2);
-        if(dCenter > gasRadius - 100) { this.moveDir = Math.atan2(MAP_H/2-this.y, MAP_W/2-this.x); this.aiSpeed=this.speed; return; }
-        if(!this.target || this.target.dead) this.target = entities.find(e=>e!==this && !e.dead && dist(this.x,this.y,e.x,e.y)<800);
+        this.decisionTimer--;
+        let distCenter = dist(this.x, this.y, MAP_W/2, MAP_H/2);
+        if(distCenter > gasRadius - 200) { this.moveDir = Math.atan2((MAP_H/2) - this.y, (MAP_W/2) - this.x); this.aiSpeed = this.speed; return; }
+        const canSee=(e)=>{
+            if(!e||e.dead)return false;
+            let d=dist(this.x,this.y,e.x,e.y);
+            if(this.type === 'juju') return d < 1200;
+            if(e.inBush&&!e.revealed&&d>200)return false;
+            return hasLOS(this.x,this.y,e.x,e.y);
+        };
+        if(!this.target||this.target.dead||!canSee(this.target)) this.target=entities.find(e=>e!==this&&!e.dead&&canSee(e));
         if(this.target){
-            let d = dist(this.x,this.y,this.target.x,this.target.y);
-            let a = Math.atan2(this.target.y-this.y, this.target.x-this.x);
-            this.angle = a;
-            if(this.type==='edgar' && this.superCharge>=100 && d < 500 && d > 150) this.shoot(true);
-            if(d > this.rangeMult * 10) { this.moveDir = a; this.aiSpeed = this.speed; }
-            else { this.aiSpeed = 0; if(this.ammo > 0 && Math.random() < 0.1) this.shoot(false); }
-        } else { this.aiSpeed = this.speed * 0.4; if(Math.random()<0.02) this.moveDir = Math.random()*Math.PI*2; }
+            let dAlvo=dist(this.x,this.y,this.target.x,this.target.y);
+            let a=Math.atan2(this.target.y-this.y,this.target.x-this.x);
+            if(this.type === 'juju') {
+                if(dAlvo < 500) { this.moveDir = a + Math.PI + (Math.sin(Date.now()/200)*0.5); this.aiSpeed = this.speed; }
+                else if(dAlvo > 700) { this.moveDir = a; this.aiSpeed = this.speed; }
+                else { this.moveDir = a + Math.PI/2 * (Math.sin(Date.now()/300) > 0 ? 1 : -1); this.aiSpeed = this.speed * 0.7; }
+                this.angle = a + (this.target.isPlayer && joyMove.active ? 0.15 : 0);
+            } else {
+                if(this.target.type === 'juju' && !hasLOS(this.x, this.y, this.target.x, this.target.y)) { this.moveDir = a + 1.2; this.aiSpeed = this.speed; }
+                else { if(dAlvo<300){this.moveDir=a+Math.PI;this.aiSpeed=this.speed} else if(dAlvo>450){this.moveDir=a;this.aiSpeed=this.speed} else {this.aiSpeed=0} }
+                this.angle = a;
+            }
+            if(this.ammo>0 && Math.random()<0.08) this.shoot(false, Math.min(1, dAlvo/650));
+            if(this.superCharge>=100) this.shoot(true, 1.0);
+        } else { if(this.decisionTimer<=0){this.decisionTimer=60;this.moveDir=Math.random()*Math.PI*2} this.aiSpeed=this.speed*0.5; this.angle = this.moveDir; }
     }
     shoot(isSuper, joyPowerInput = 1.0){
-        if(isSuper) { 
-            if(this.superCharge < 100) return; this.superCharge = 0;
-            if(this.type === 'edgar') { this.isJumping = true; this.jumpTime = 30; this.revealed = true; return; }
-            if(this.type === 'juju') { entities.forEach(e=>{if(e!==this)e.markedTimer=60}); let distA = 650*joyPowerInput; bullets.push(new Bullet(this.x+Math.cos(this.angle)*distA, this.y+Math.sin(this.angle)*distA, 0,0,210,20,this,false,false,true)); return; }
-        } else {
-            if(this.ammo <= 0) return; this.ammo--;
-            if(this.type === 'edgar') {
-                setTimeout(()=>bullets.push(new Bullet(this.x,this.y,this.angle,15,10,this.dmg,this,false,false,false,true)),0);
-                setTimeout(()=>bullets.push(new Bullet(this.x,this.y,this.angle,15,10,this.dmg,this,false,false,false,true)),150);
-                return;
-            }
-            for(let i=0; i<this.bullets; i++) bullets.push(new Bullet(this.x,this.y,this.angle+(i-this.bullets/2)*this.spread,20,this.rangeMult,this.dmg,this,false,this.isLobber));
+        if(isSuper) { if(this.superCharge < 100) return; this.superCharge = 0; } else { if(this.ammo <= 0) return; this.ammo--; }
+        this.regenTimer=0; if(this.inBush){this.revealed=true;this.revealTimer=120}
+        let totalDmg = this.dmg*(1+this.power*0.1); 
+        if(this.type === 'juju' && isSuper) {
+            entities.forEach(e => { if(e !== this) e.markedTimer = 60; });
+            let distAim = 650 * joyPowerInput;
+            let ax = this.x + Math.cos(this.angle) * distAim;
+            let ay = this.y + Math.sin(this.angle) * distAim;
+            bullets.push(new Bullet(ax, ay, 0, 0, 210, 20, this, false, false, false, true));
+            return;
+        }
+        if(this.type === 'bull' && isSuper) { let sA = this.angle - 0.2; for(let i=0; i<5; i++) bullets.push(new Bullet(this.x, this.y, sA + (i*0.1), 20, 60, totalDmg*1.5, this, true)); return; }
+        if(this.type === '8bit' && isSuper){ let s=0; let it=setInterval(()=>{ if(this.dead||s>=16){clearInterval(it);return} bullets.push(new Bullet(this.x,this.y,this.angle+(Math.random()-0.5)*0.1,25,this.rangeMult,totalDmg*1.5,this));s++ },60); return; }
+        let count = this.bullets;
+        let sA=this.angle-(this.spread/2), step=count>1?this.spread/(count-1):0;
+        for(let i=0;i<count;i++) {
+            if(this.isLobber) { let life = Math.max(10, Math.floor((650 / 15) * joyPowerInput)); bullets.push(new Bullet(this.x, this.y, sA+(step*i), 15, life, totalDmg, this, false, true)); 
+            } else { bullets.push(new Bullet(this.x,this.y,sA+(step*i),25,this.rangeMult,totalDmg,this, false)); }
         }
     }
     takeDamage(d, attacker){
-        this.hp-=d; this.regenTimer=0; if(attacker) attacker.superCharge = Math.min(100, attacker.superCharge + 8);
+        this.hp-=d; this.regenTimer=0; if(!this.dead) particles.push(new Particle(this.x,this.y-50,Math.floor(d),"#ff1744"));
+        if(attacker) { 
+            let charge = (attacker.type === 'juju') ? 30 : 18;
+            attacker.superCharge = Math.min(100, attacker.superCharge + charge); 
+            if(!this.isPlayer){ this.target=attacker; this.decisionTimer=40; } 
+        }
         if(this.hp<=0) this.die();
     }
-    die(){ if(this.dead)return; this.dead=true; survivors--; if(this.isPlayer) endGame(false); else if(survivors===1) endGame(true); }
+    die(){
+        if(this.dead)return; this.dead=true; survivors--; document.getElementById('ui-alive').innerText=survivors;
+        for(let i=0;i<Math.max(1, Math.min(this.power, 3));i++) drops.push({x:this.x+(Math.random()-0.5)*80,y:this.y+(Math.random()-0.5)*80});
+        if(this.isPlayer) setTimeout(()=>endGame(false),1500); else if(survivors===1&&!player.dead) endGame(true);
+    }
     draw(){
-        if(this.dead || (this.inBush && !this.isPlayer && dist(this.x,this.y,player.x,player.y)>200 && this.markedTimer<=0)) return;
+        if(this.dead)return; 
+        if(this.inBush&&!this.isPlayer&&!this.revealed&&dist(this.x,this.y,player.x,player.y)>220 && this.markedTimer <= 0) return;
         ctx.save(); ctx.translate(this.x,this.y);
-        if(this.isJumping) ctx.scale(1.5, 1.5);
-        if(this.markedTimer > 0) { ctx.fillStyle="#ffca28"; ctx.beginPath(); ctx.moveTo(0,-130); ctx.lineTo(-15,-150); ctx.lineTo(15,-150); ctx.fill(); }
-        // HUD vida/ammo
-        ctx.fillStyle="#111"; ctx.fillRect(-60,-95,120,10); ctx.fillStyle=this.isPlayer?"#00e676":"#f44336"; ctx.fillRect(-60,-95,120*(this.hp/this.maxHp),10);
-        // Desenho do corpo
-        ctx.rotate(this.angle); ctx.fillStyle=this.baseColor; ctx.beginPath(); ctx.arc(0,0,25,0,Math.PI*2); ctx.fill();
-        if(this.type === 'edgar') { ctx.fillStyle="#000"; ctx.fillRect(10,-25,15,50); } // Cachecol
-        ctx.restore();
+        if(this.markedTimer > 0) { ctx.fillStyle = "#ffca28"; ctx.beginPath(); ctx.moveTo(0, -130); ctx.lineTo(-15, -150); ctx.lineTo(15, -150); ctx.fill(); }
+        if(this.isPlayer && this.type === 'juju' && joyShoot.active) {
+            let targetDist = 650 * joyShoot.power;
+            let tx = Math.cos(this.angle) * targetDist; let ty = Math.sin(this.angle) * targetDist;
+            ctx.fillStyle = "rgba(118, 255, 3, 0.2)"; ctx.strokeStyle = "#76ff03"; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.arc(tx, ty, 80, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        }
+        if(this.isPlayer && this.type === 'juju' && joySuper.active && this.superCharge >= 100) {
+            let targetDist = 650 * joySuper.power;
+            let tx = Math.cos(this.angle) * targetDist; let ty = Math.sin(this.angle) * targetDist;
+            ctx.fillStyle = "rgba(0, 0, 0, 0.2)"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.arc(tx, ty, 250, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        }
+        if(this.inBush)ctx.globalAlpha=0.5;
+        ctx.fillStyle="#111"; ctx.fillRect(-60,-95,120,15);
+        ctx.fillStyle=this.isPlayer?"#00e676":"#d50000"; ctx.fillRect(-60,-95,120*(Math.max(0,this.hp)/this.maxHp),15);
+        ctx.fillStyle="#fff"; ctx.font="bold 12px Arial"; ctx.textAlign="center"; ctx.fillText(Math.floor(this.hp) + " / " + this.maxHp, 0, -83);
+        ctx.fillStyle="#ff9100"; ctx.fillRect(-45,-78,30*this.ammo,5);
+        ctx.fillStyle="#ffeb3b"; ctx.fillRect(-45,-71,90*(this.superCharge/100),5);
+        if(this.power>0){ctx.fillStyle="#fff";ctx.font="bold 18px Arial";ctx.fillText("⚡"+this.power,-75,-83)}
+        ctx.rotate(this.angle); ctx.fillStyle="#111"; ctx.beginPath(); ctx.arc(-15,-15,10,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(-15,15,10,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle=this.baseColor; ctx.beginPath(); ctx.arc(0,0,26,0,Math.PI*2); ctx.fill(); ctx.fillStyle="rgba(0,0,0,0.3)"; ctx.fillRect(-13,-20,26,40);
+        ctx.fillStyle="#f5c6a5"; ctx.beginPath(); ctx.arc(15,-12,9,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(25,12,9,0,Math.PI*2); ctx.fill(); 
+        ctx.fillStyle="#333"; ctx.fillRect(10,4,60,8); ctx.fillStyle="#5d4037"; ctx.fillRect(10,4,35,8); ctx.fillRect(0,4,10,14); ctx.fillStyle="#000"; ctx.fillRect(40,10,10,14);
+        ctx.fillStyle=this.isPlayer?"#1565c0":"#c62828"; ctx.beginPath(); ctx.arc(0,0,19,0,Math.PI*2); ctx.fill(); ctx.restore(); ctx.globalAlpha=1;
     }
 }
 
-// Funções auxiliares (Map, Collisions, Loop) - Mantidas as mesmas da Juju
+function hasLOS(x1,y1,x2,y2){ let d=dist(x1,y1,x2,y2), s=Math.ceil(d/40); for(let i=1;i<s;i++){ let tx=x1+(x2-x1)*(i/s), ty=y1+(y2-y1)*(i/s); if(checkWall(tx,ty)) return false; } return true; }
 function dist(x1,y1,x2,y2){return Math.hypot(x1-x2,y1-y2)}
 function checkWall(x,y){for(let w of walls)if(x>w.x&&x<w.x+w.w&&y>w.y&&y<w.y+w.h)return true;return false}
-function hasLOS(x1,y1,x2,y2){ let d=dist(x1,y1,x2,y2), s=Math.ceil(d/40); for(let i=1;i<s;i++){if(checkWall(x1+(x2-x1)*(i/s), y1+(y2-y1)*(i/s))) return false;} return true; }
-
-const MAPS = [{ color: "#3e2723", wallColor: "#21100b", bushColor: "#4e342e", grid: ["WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW","WS...C...W.......C.......W...C.......SW","W.........W...MMMMMMM...W.............W","W...MM....C...MMMMMMM...C....MM.......W","W...MM.......................MM.......W","W.........WWC..........WW.............W","W...C.....WW......C....WW.............W","W...WWWW.......W...W.......WWWW.......W","W...W...C......MMMMM......C...W.......W","W...W............C............W.......W","WS...C...W...............W...C.......SW","WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"] }];
 
 function startGame(){
-    document.getElementById('homeScreen').style.display='none'; document.getElementById('selectionScreen').style.display='none'; document.getElementById('ui-layer').style.display='block';
-    walls=[]; bushes=[]; boxes=[]; spawns=[]; entities=[]; drops=[]; bullets=[]; gasRadius=2500;
-    let grid=MAPS[0].grid; MAP_W=grid[0].length*TILE; MAP_H=grid.length*TILE;
+    document.querySelectorAll('.menu-screen').forEach(s=>s.style.display='none');document.getElementById('ui-layer').style.display='block';
+    currentMap=MAPS[0]; walls=[]; bushes=[]; boxes=[]; spawns=[]; entities=[]; drops=[]; bullets=[]; particles=[];
+    let grid=currentMap.grid; MAP_W=grid[0].length*TILE; MAP_H=grid.length*TILE; gasRadius=MAP_W * 0.8;
     for(let y=0;y<grid.length;y++)for(let x=0;x<grid[0].length;x++){
         let t=grid[y][x],px=x*TILE,py=y*TILE;
-        if(t==='W')walls.push({x:px,y:py,w:TILE,h:TILE,isBorder:x===0||y===0||x===grid[0].length-1||y===grid.length-1});
+        let isBorder = (x===0 || y===0 || x===grid[0].length-1 || y===grid.length-1);
+        if(t==='W')walls.push({x:px,y:py,w:TILE,h:TILE,isBorder:isBorder});
         if(t==='M')bushes.push({x:px,y:py,w:TILE,h:TILE});
         if(t==='C')boxes.push({x:px+TILE/2,y:py+TILE/2,hp:5000,dead:false});
         if(t==='S')spawns.push({x:px+TILE/2,y:py+TILE/2});
     }
-    player=new Brawler(spawns[0].x,spawns[0].y,selectedBrawlerKey,true); entities.push(player);
-    let types=Object.keys(BRAWLERS); for(let i=1;i<6;i++) entities.push(new Brawler(spawns[i].x,spawns[i].y,types[Math.floor(Math.random()*types.length)],false));
-    survivors=entities.length; document.getElementById('ui-alive').innerText=survivors; gameActive=true; loop();
+    spawns.sort(()=>Math.random()-0.5); player=new Brawler(spawns[0].x,spawns[0].y,selectedBrawlerKey,true); entities.push(player);
+    let types=['shelly','shelly2','colt','bull','8bit','juju']; for(let i=1;i<spawns.length&&i<=9;i++)entities.push(new Brawler(spawns[i].x,spawns[i].y,types[Math.floor(Math.random()*types.length)],false));
+    survivors=entities.length; document.getElementById('ui-alive').innerText=survivors; gameActive=true; paused=false; loop();
 }
 
-function endGame(win){ gameActive=false; alert(win?"VITÓRIA!":"DERROTA"); location.reload(); }
+function togglePause(){if(!gameActive)return;paused=!paused;document.getElementById('pauseMenu').style.display=paused?'flex':'none'}
+function endGame(win){gameActive=false;document.getElementById('endScreen').style.display='flex';document.getElementById('endTitle').innerText=win?"VITÓRIA!":"DERROTA";document.getElementById('endSub').innerText=win?"DOMINAÇÃO TOTAL!":"Posição: #"+survivors}
 
 function loop(){
-    if(!gameActive)return; requestAnimationFrame(loop); gasRadius-=0.3;
-    entities.forEach(e=>e.update()); bullets.forEach((b,i)=>{b.update();if(b.life<=0)bullets.splice(i,1)});
-    cam.x=player.x-cvs.width/2; cam.y=player.y-cvs.height/2;
-    ctx.clearRect(0,0,cvs.width,cvs.height); ctx.save(); ctx.translate(-cam.x,-cam.y);
-    ctx.fillStyle=MAPS[0].color; ctx.fillRect(0,0,MAP_W,MAP_H);
-    bushes.forEach(b=>{ctx.fillStyle=MAPS[0].bushColor;ctx.fillRect(b.x,b.y,b.w,b.h)});
-    boxes.forEach(b=>{if(!b.dead){ctx.fillStyle="#ffb74d";ctx.fillRect(b.x-40,b.y-40,80,80)}});
-    entities.forEach(e=>e.draw()); bullets.forEach(b=>b.draw());
-    walls.forEach(w=>{ctx.fillStyle=MAPS[0].wallColor;ctx.fillRect(w.x,w.y,w.w,w.h)});
-    ctx.restore();
-    if(player.superCharge>=100) document.getElementById('j-super').classList.add('super-ready');
-    else document.getElementById('j-super').classList.remove('super-ready');
+    if(!gameActive)return; requestAnimationFrame(loop); if(paused)return; gasRadius-=0.8;
+    entities.forEach(e=>e.update()); bullets.forEach((b,i)=>{b.update();if(b.life<=0)bullets.splice(i,1)}); particles.forEach((p,i)=>{p.update();if(p.life<=0)particles.splice(i,1)});
+    cam.x=Math.max(0,Math.min(player.x-cvs.width/2,MAP_W-cvs.width));cam.y=Math.max(0,Math.min(player.y-cvs.height/2,MAP_H-cvs.height));
+    ctx.fillStyle="#000";ctx.fillRect(0,0,cvs.width,cvs.height);ctx.save();ctx.translate(-cam.x,-cam.y);
+    ctx.fillStyle=currentMap.color;ctx.fillRect(0,0,MAP_W,MAP_H);
+    ctx.fillStyle=currentMap.bushColor;bushes.forEach(b=>ctx.fillRect(b.x,b.y,b.w,b.h));
+    drops.forEach(d=>{ctx.fillStyle="#00e5ff";ctx.fillRect(d.x-15,d.y-15,30,30)});
+    boxes.forEach(b=>{if(b.dead)return;ctx.fillStyle="#ffb74d";ctx.fillRect(b.x-45,b.y-45,90,90);ctx.fillStyle="#000";ctx.fillRect(b.x-35,b.y-60,70,8);ctx.fillStyle="#0f0";ctx.fillRect(b.x-35,b.y-60,70*(b.hp/5000),8)});
+    entities.sort((a,b)=>a.y-b.y).forEach(e=>e.draw()); bullets.forEach(b=>b.draw()); particles.forEach(p=>p.draw());
+    walls.forEach(w=>{ ctx.fillStyle=w.isBorder?"#222":currentMap.wallColor; ctx.fillRect(w.x,w.y,w.w,w.h); if(w.isBorder){ctx.strokeStyle="#444";ctx.lineWidth=4;ctx.strokeRect(w.x,w.y,w.w,w.h)} });
+    ctx.strokeStyle="rgba(0,255,0,0.3)";ctx.lineWidth=1500;ctx.beginPath();ctx.arc(MAP_W/2,MAP_H/2,gasRadius+750,0,Math.PI*2);ctx.stroke();ctx.restore();
 }
 
 function handleJoy(e,j,isP){
-    e.preventDefault(); if(!isP){ if(j.active){ if(j.id==='j-super')player.shoot(true,j.power); else player.shoot(false,j.power);} j.active=false; return;}
-    let t=e.targetTouches[0], r=e.currentTarget.getBoundingClientRect(), dx=t.clientX-(r.left+r.width/2), dy=t.clientY-(r.top+r.height/2);
-    j.active=true; j.x=dx/50; j.y=dy/50; j.power=Math.min(dist(0,0,dx,dy)/50, 1);
+    if(paused)return; e.preventDefault();
+    if(!isP){ if(j.active){ if(j.id === 'j-super') player.shoot(true, j.power); else if(j.id === 'j-shoot') player.shoot(false, j.power); } j.active=false;j.x=0;j.y=0;j.power=0;document.getElementById(j.stick).style.transform=`translate(-50%,-50%)`; return; }
+    let t=e.targetTouches[0],r=e.currentTarget.getBoundingClientRect(),dx=t.clientX-(r.left+r.width/2),dy=t.clientY-(r.top+r.height/2);
+    let distVal=Math.min(Math.hypot(dx,dy),50),ang=Math.atan2(dy,dx);
+    j.active=true;j.x=Math.cos(ang);j.y=Math.sin(ang);j.power=distVal/50;
+    document.getElementById(j.stick).style.transform=`translate(calc(-50% + ${Math.cos(ang)*distVal}px), calc(-50% + ${Math.sin(ang)*distVal}px))`;
 }
 [joyMove, joyShoot, joySuper].forEach(j=>{ let el=document.getElementById(j.id); el.addEventListener('touchstart',e=>handleJoy(e,j,true)); el.addEventListener('touchmove',e=>handleJoy(e,j,true)); el.addEventListener('touchend',e=>handleJoy(e,j,false)); });
 initMenu();
