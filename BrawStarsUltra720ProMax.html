@@ -276,16 +276,17 @@ class Brawler {
             let distAim = 650 * joyPowerInput;
             let ax = this.x + Math.cos(this.angle) * distAim;
             let ay = this.y + Math.sin(this.angle) * distAim;
-            bullets.push(new Bullet(ax, ay, 0, 0, 210, 20, this, false, false, false, true));
+            bullets.push(new Bullet(ax, ay, 0, 0, 210, 9, this, false, false, false, true));
             return;
         }
         if(this.type === 'bull' && isSuper) { let sA = this.angle - 0.2; for(let i=0; i<5; i++) bullets.push(new Bullet(this.x, this.y, sA + (i*0.1), 20, 60, totalDmg*1.5, this, true)); return; }
         if(this.type === '8bit'){ 
             let s=0; let maxB = isSuper ? 16 : 7;
             let dmult = isSuper ? 1.5 : 1.0;
+            let lockedAngle = this.angle;
             let it=setInterval(()=>{ 
                 if(this.dead||s>=maxB){clearInterval(it);return} 
-                bullets.push(new Bullet(this.x,this.y,this.angle+(Math.random()-0.5)*0.1,25,this.rangeMult,totalDmg*dmult,this));
+                bullets.push(new Bullet(this.x,this.y,lockedAngle+(Math.random()-0.5)*0.1,25,this.rangeMult,totalDmg*dmult,this));
                 s++ 
             },60); 
             return; 
