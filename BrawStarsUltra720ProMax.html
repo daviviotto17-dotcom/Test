@@ -174,7 +174,7 @@ class Bullet {
             if(!this.isLobber) { this.life=0; return; }
         }
         if(this.isLobber) { if(this.life <= 0) { this.explode(); return; } return; }
-        for(let b of boxes){if(!b.dead && dist(this.x,this.y,b.x,b.y)<60){b.hp-=this.dmg; if(!this.wallBuster) { this.life=0; return; }}}
+        for(let b of boxes){if(!b.dead && dist(this.x,this.y,b.x,b.y)<60){b.hp-=this.dmg; if(b.hp <= 0) { b.dead=true; drops.push({x:b.x,y:b.y}); } if(!this.wallBuster) { this.life=0; return; }}}
         for(let e of entities){if(e!==this.owner && !e.dead && dist(this.x,this.y,e.x,e.y)<45){e.takeDamage(this.dmg,this.owner); if(!this.wallBuster) { this.life=0; return; }}}
     }
     explode() {
