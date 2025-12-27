@@ -280,7 +280,16 @@ class Brawler {
             return;
         }
         if(this.type === 'bull' && isSuper) { let sA = this.angle - 0.2; for(let i=0; i<5; i++) bullets.push(new Bullet(this.x, this.y, sA + (i*0.1), 20, 60, totalDmg*1.5, this, true)); return; }
-        if(this.type === '8bit' && isSuper){ let s=0; let it=setInterval(()=>{ if(this.dead||s>=16){clearInterval(it);return} bullets.push(new Bullet(this.x,this.y,this.angle+(Math.random()-0.5)*0.1,25,this.rangeMult,totalDmg*1.5,this));s++ },60); return; }
+        if(this.type === '8bit'){ 
+            let s=0; let maxB = isSuper ? 16 : 7;
+            let dmult = isSuper ? 1.5 : 1.0;
+            let it=setInterval(()=>{ 
+                if(this.dead||s>=maxB){clearInterval(it);return} 
+                bullets.push(new Bullet(this.x,this.y,this.angle+(Math.random()-0.5)*0.1,25,this.rangeMult,totalDmg*dmult,this));
+                s++ 
+            },60); 
+            return; 
+        }
         let count = this.bullets;
         let sA=this.angle-(this.spread/2), step=count>1?this.spread/(count-1):0;
         for(let i=0;i<count;i++) {
