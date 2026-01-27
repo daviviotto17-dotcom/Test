@@ -102,12 +102,11 @@ cvs.width = window.innerWidth;
 cvs.height = window.innerHeight;
 
 const BRAWLERS = {
-    shelly: { name: "SHELLY", hp: 4000, speed: 6.5, bullets: 5, spread: 0.35, range: 40, reload: 45, dmg: 340, color: "#f06292", desc: "Rajada de chumbo grosso.", superName: "SUPERBALA" },
-    edgar: { name: "EDGAR", hp: 3800, speed: 8.2, bullets: 2, spread: 0.2, range: 22, reload: 20, dmg: 540, color: "#212121", desc: "Salto e cachecol.", superName: "SALTO" },
-    mortis: { name: "MORTIS", hp: 3800, speed: 8.0, bullets: 1, spread: 0, range: 35, reload: 50, dmg: 1200, color: "#311b92", desc: "Dash e teletransporte de pá.", superName: "FINCAR PÁ" },
-    colt: { name: "COLT", hp: 3200, speed: 7.5, bullets: 1, spread: 0.02, range: 75, reload: 35, dmg: 820, color: "#4dd0e1", desc: "Atirador de elite.", superName: "TREM-BALA" }, 
-    bull: { name: "BULL", hp: 6000, speed: 5.1, bullets: 4, spread: 0.45, range: 17, reload: 67, dmg: 699, color: "#ffb74d", desc: "Tanque agressivo.", superName: "BULLDOZER" },
-    '8bit': { name: "8-BIT", hp: 5200, speed: 4.8, bullets: 7, spread: 0.05, range: 90, reload: 89, dmg: 522, color: "#7e57c2", desc: "Poderoso e lento.", superName: "16x DANO" },
+    shelly: { name: "SHELLY", hp: 4000, speed: 6.5, bullets: 5, spread: 0.35, range: 48, reload: 45, dmg: 340, color: "#f06292", desc: "Rajada de chumbo grosso.", superName: "SUPERBALA" },
+    edgar: { name: "EDGAR", hp: 3800, speed: 8.2, bullets: 2, spread: 0.2, range: 7, reload: 15, dmg: 1600, color: "#212121", desc: "Salto e socos.", superName: "SALTO" },
+    colt: { name: "COLT", hp: 3200, speed: 7.5, bullets: 1, spread: 0.02, range: 90, reload: 35, dmg: 820, color: "#4dd0e1", desc: "Atirador de elite.", superName: "TREM-BALA" }, 
+    bull: { name: "BULL", hp: 6000, speed: 5.1, bullets: 4, spread: 0.45, range: 20, reload: 67, dmg: 699, color: "#ffb74d", desc: "Tanque agressivo.", superName: "BULLDOZER" },
+    '8bit': { name: "8-BIT", hp: 5200, speed: 4.8, bullets: 6, spread: 0.05, range: 108, reload: 144, dmg: 680, color: "#7e57c2", desc: "Poderoso e lento.", superName: "TORRETA" },
     juju: { name: "JUJU", hp: 3800, speed: 6.8, bullets: 1, spread: 0.0, range: 650, reload: 55, dmg: 1400, color: "#76ff03", desc: "Magia de área. Super: Aura do Vazio.", superName: "O VAZIO", isLobber: true }
 };
 
@@ -148,30 +147,251 @@ function renderMenuCharCtx(ctx, key, x, y) {
 
 const MAPS = [{ color: "#795548", wallColor: "#4e342e", bushColor: "#8d6e63", grid: ["WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW","WS...C...W.......C.......W...C.......SW","W.........W...MMMMMMM...W.............W","W...MM....C...MMMMMMM...C....MM.......W","W...MM.......................MM.......W","W.........WWC..........WW.............W","W...C.....WW......C....WW.............W","W.....................................W","W...C..........WW.WW..........C.......W","W..............W...W..................W","W.....C........W...W..................W","W..............W...W..................W","W...WWWW.......W...W.......WWWW.......W","W...W..........W...W..........W.......W","W...W...C......MMMMM......C...W.......W","W...W............C............W.......W","W...W.........................W.......W","W.............WMMMMMW.................W","W............CWMMMMMW...........C.....W","W.....C.......WMMMMMW.................W","W............CWMMMMMWC................W","W.............WMMMMMW.................W","W...W.........................W.......W","W...W.........................W.......W","W...W...C......MMMMM......C...W.......W","W...W..........W...W..........W.......W","W...WWWW.......W...W.......WWWW.......W","WS............CW.S.WC.................SW","W..............W...W..................W","W..............W...W..................W","W...C..........WW.WW..........C.......W","W.....................................W","W.........WW...........WW.............W","W.........WW...........WW.............W","W...MM....C.............C....MM.......W","W...MM........MMMMMMM........MM.......W","W.........W...MMMMMMM...W.............W","WS...C...W...............W...C.......SW","WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW","WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"] }];
 const TILE = 120;
-let walls=[], bushes=[], boxes=[], spawns=[], entities=[], bullets=[], particles=[], drops=[];
+let walls=[], bushes=[], boxes=[], spawns=[], entities=[], bullets=[], particles=[], drops=[], punchEffects=[], turrets=[], ducks=[], coltMissiles=[];
 let player=null, cam={x:0, y:0}, gameActive=false, paused=false, survivors=0, gasRadius=0, currentMap=null;
-const joyMove={x:0, y:0, active:false, id:'j-move', stick:'stick-move'};
-const joyShoot={x:0, y:0, active:false, id:'j-shoot', stick:'stick-shoot', power: 0};
-const joySuper={x:0, y:0, active:false, id:'j-super', stick:'stick-super', power: 0};
+const joyMove={x:0, y:0, active:false, id:'j-move', stick:'stick-move', wasActive:false};
+const joyShoot={x:0, y:0, active:false, id:'j-shoot', stick:'stick-shoot', power: 0, wasActive:false};
+const joySuper={x:0, y:0, active:false, id:'j-super', stick:'stick-super', power: 0, wasActive:false};
+
+class PunchEffect {
+    constructor(x, y, angle) {
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        this.life = 12;
+        this.distance = 0;
+        this.maxDist = 90;
+    }
+    update() {
+        this.life--;
+        this.distance += 8;
+    }
+    draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+        ctx.globalAlpha = this.life / 12;
+        
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 10;
+        ctx.lineCap = "round";
+        
+        for(let i = 0; i < 3; i++) {
+            let offset = (i - 1) * 30;
+            ctx.beginPath();
+            ctx.moveTo(0, offset);
+            ctx.lineTo(this.distance, offset);
+            ctx.stroke();
+        }
+        
+        ctx.fillStyle = "#ffff00";
+        ctx.font = "bold 50px Arial";
+        ctx.fillText("💥", this.distance - 25, 15);
+        
+        ctx.restore();
+        ctx.globalAlpha = 1;
+    }
+}
+
+class Duck {
+    constructor(x, y, owner, turret) {
+        this.x = x;
+        this.y = y;
+        this.owner = owner;
+        this.turret = turret;
+        this.vx = 0;
+        this.vy = 0;
+        this.speed = 9;
+        this.attacksLeft = 5;
+        this.dead = false;
+        this.dmg = 200;
+        this.target = null;
+        this.size = 25;
+        this.attackCooldown = 0;
+    }
+    update() {
+        if(this.dead) return;
+        
+        if(this.attackCooldown > 0) this.attackCooldown--;
+        
+        // Procurar alvo mais próximo
+        let closestDist = Infinity;
+        this.target = null;
+        for(let e of entities) {
+            if(e !== this.owner && !e.dead) {
+                let d = dist(this.x, this.y, e.x, e.y);
+                if(d < closestDist && d < 800) {
+                    closestDist = d;
+                    this.target = e;
+                }
+            }
+        }
+        
+        // Perseguir alvo
+        if(this.target) {
+            let angle = Math.atan2(this.target.y - this.y, this.target.x - this.x);
+            this.vx = Math.cos(angle) * this.speed;
+            this.vy = Math.sin(angle) * this.speed;
+            
+            // Checar colisão com alvo
+            if(dist(this.x, this.y, this.target.x, this.target.y) < 50 && this.attackCooldown <= 0) {
+                this.target.takeDamage(this.dmg, this.owner);
+                this.owner.hp = Math.min(this.owner.maxHp, this.owner.hp + 100);
+                particles.push(new Particle(this.owner.x, this.owner.y - 60, "+100 HP", "#00ff00"));
+                particles.push(new Particle(this.target.x, this.target.y - 50, "QUACK!", "#ffeb3b"));
+                
+                this.attacksLeft--;
+                this.attackCooldown = 30;
+                
+                if(this.attacksLeft <= 0) {
+                    this.dead = true;
+                }
+                return;
+            }
+        } else {
+            this.vx *= 0.95;
+            this.vy *= 0.95;
+        }
+        
+        // Movimento
+        if(!checkWall(this.x + this.vx, this.y)) this.x += this.vx;
+        if(!checkWall(this.x, this.y + this.vy)) this.y += this.vy;
+    }
+    takeDamage(d) {
+        this.attacksLeft--;
+        particles.push(new Particle(this.x, this.y - 30, Math.floor(d), "#ff5252"));
+        if(this.attacksLeft <= 0) this.dead = true;
+    }
+    draw() {
+        if(this.dead) return;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        
+        // Corpo do pato
+        ctx.fillStyle = "#ffeb3b";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, this.size, this.size * 0.8, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Cabeça
+        ctx.fillStyle = "#ffca28";
+        ctx.beginPath();
+        ctx.arc(-this.size * 0.4, -this.size * 0.3, this.size * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Bico
+        ctx.fillStyle = "#ff9800";
+        ctx.beginPath();
+        ctx.moveTo(-this.size * 0.7, -this.size * 0.3);
+        ctx.lineTo(-this.size * 1.1, -this.size * 0.4);
+        ctx.lineTo(-this.size * 1.1, -this.size * 0.2);
+        ctx.fill();
+        
+        // Olho
+        ctx.fillStyle = "#000";
+        ctx.beginPath();
+        ctx.arc(-this.size * 0.5, -this.size * 0.4, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Mostrar ataques restantes
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 16px Arial";
+        ctx.textAlign = "center";
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 3;
+        ctx.strokeText(this.attacksLeft, 0, -this.size - 10);
+        ctx.fillText(this.attacksLeft, 0, -this.size - 10);
+        
+        ctx.restore();
+    }
+}
+
+class Turret {
+    constructor(x, y, owner) {
+        this.x = x;
+        this.y = y;
+        this.owner = owner;
+        this.hp = 1500;
+        this.maxHp = 1500;
+        this.dead = false;
+        this.shootTimer = 0;
+        this.shootInterval = 120; // 2 segundos
+        this.size = 50;
+    }
+    update() {
+        if(this.dead) return;
+        
+        this.shootTimer++;
+        if(this.shootTimer >= this.shootInterval) {
+            this.shootTimer = 0;
+            // Soltar um pato
+            ducks.push(new Duck(this.x, this.y, this.owner, this));
+            particles.push(new Particle(this.x, this.y - 60, "QUACK!", "#ffeb3b"));
+        }
+    }
+    takeDamage(d) {
+        this.hp -= d;
+        particles.push(new Particle(this.x, this.y - 50, Math.floor(d), "#ff1744"));
+        if(this.hp <= 0) this.dead = true;
+    }
+    draw() {
+        if(this.dead) return;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        
+        // Base da torreta
+        ctx.fillStyle = "#7e57c2";
+        ctx.fillRect(-this.size, -this.size * 0.5, this.size * 2, this.size);
+        
+        // Torre
+        ctx.fillStyle = "#5e35b1";
+        ctx.fillRect(-this.size * 0.6, -this.size * 1.2, this.size * 1.2, this.size);
+        
+        // Detalhe topo
+        ctx.fillStyle = "#ffeb3b";
+        ctx.fillRect(-this.size * 0.7, -this.size * 1.3, this.size * 1.4, this.size * 0.2);
+        
+        // Barra de HP
+        ctx.fillStyle = "#111";
+        ctx.fillRect(-this.size, -this.size - 25, this.size * 2, 12);
+        ctx.fillStyle = "#00e676";
+        ctx.fillRect(-this.size, -this.size - 25, (this.size * 2) * (this.hp / this.maxHp), 12);
+        
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 11px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(Math.floor(this.hp) + "/" + this.maxHp, 0, -this.size - 16);
+        
+        ctx.restore();
+    }
+}
 
 class Particle { constructor(x,y,t,c){this.x=x;this.y=y;this.text=t;this.color=c;this.life=50;this.vy=-2} update(){this.y+=this.vy;this.life--} draw(){ctx.globalAlpha=this.life/50;ctx.fillStyle=this.color;ctx.font="bold 28px 'Black Ops One'";ctx.strokeStyle="black";ctx.lineWidth=4;ctx.strokeText(this.text,this.x,this.y);ctx.fillText(this.text,this.x,this.y);ctx.globalAlpha=1} }
 
 class Bullet {
-    constructor(x,y,a,s,l,d,o, wallBuster=false, lobber=false, missile=false, isAura=false){
+    constructor(x,y,a,s,l,d,o, wallBuster=false, lobber=false, missile=false, isAura=false, stunDuration=0){
         this.x=x;this.y=y;this.angle = a; this.speed = s;
         this.vx=Math.cos(a)*s;this.vy=Math.sin(a)*s;
         this.life=l;this.maxLife=l;this.dmg=d;this.owner=o;
         this.wallBuster=wallBuster;this.isLobber=lobber;this.isMissile=missile;
         this.isAura = isAura;
         this.hitSomething = false;
+        this.damageInterval = 20;
+        this.lastDamageFrame = 0;
+        this.stunDuration = stunDuration;
     }
     update(){
         if(this.isAura) {
             this.life--;
+            this.lastDamageFrame++;
             if(this.life <= 0) return;
-            for(let e of entities) {
-                if(e !== this.owner && !e.dead && dist(this.x, this.y, e.x, e.y) < 250) {
-                    e.takeDamage(this.dmg, this.owner);
+            
+            if(this.lastDamageFrame >= this.damageInterval) {
+                this.lastDamageFrame = 0;
+                for(let e of entities) {
+                    if(e !== this.owner && !e.dead && dist(this.x, this.y, e.x, e.y) < 250) {
+                        e.takeDamage(this.dmg, this.owner);
+                    }
                 }
             }
             return;
@@ -188,7 +408,11 @@ class Bullet {
             if(!this.wallBuster) { this.life=0; this.hitSomething=true; return; }
         }}
         for(let e of entities){if(e!==this.owner && !e.dead && dist(this.x,this.y,e.x,e.y)<45){
-            e.takeDamage(this.dmg,this.owner); 
+            e.takeDamage(this.dmg,this.owner);
+            if(this.stunDuration > 0) {
+                e.stunTimer = this.stunDuration;
+                particles.push(new Particle(e.x, e.y - 70, "STUNNED!", "#ffeb3b"));
+            }
             this.hitSomething=true;
             if(!this.wallBuster) { this.life=0; return; }
         }}
@@ -231,60 +455,204 @@ class Brawler {
         this.isLobber = s.isLobber || false; this.markedTimer = 0;
         this.immuneTimer = 0;
         this.gadgetsLeft = 3;
-        this.mortisPaX = null; this.mortisPaY = null;
-        this.mortisHasBuff = false;
+        this.gadgetCooldown = 0;
+        this.supersForGadget = 0; // Para Shelly - conta quantas supers carregou
+        this.shieldHP = 0; // Para Edgar - escudo
+        this.shieldDecay = 0; // Para Edgar - taxa de decaimento do escudo
+        this.bullNextStun = false; // Para Bull - próximo ataque paralisa
+        this.jujuBuffed = false; // Para Juju - próximo ataque bufado
         this.dashFrames = 0; this.dashVX = 0; this.dashVY = 0; this.dashDmg = 0;
         this.botAttackTimer = 0;
+        this.botSuperCooldown = 0;
+        this.attackingTimer = 0;
+        this.edgarSuperRechargeTimer = 0;
+        this.bulldozerFrames = 0; this.bulldozerVX = 0; this.bulldozerVY = 0;
+        this.punchCooldown = 0;
+        this.dashCooldown = 0;
+        this.stunTimer = 0;
+        this.speedBoostTimer = 0;
     }
     update(){
         if(this.dead)return;
         if(this.markedTimer > 0) this.markedTimer--;
         if(this.immuneTimer > 0) this.immuneTimer--;
+        if(this.botSuperCooldown > 0) this.botSuperCooldown--;
+        if(this.attackingTimer > 0) this.attackingTimer--;
+        if(this.punchCooldown > 0) this.punchCooldown--;
+        if(this.dashCooldown > 0) this.dashCooldown--;
+        if(this.speedBoostTimer > 0) this.speedBoostTimer--;
+        if(this.gadgetCooldown > 0) this.gadgetCooldown--;
+        
+        // Decaimento do escudo do Edgar
+        if(this.shieldHP > 0) {
+            this.shieldHP = Math.max(0, this.shieldHP - this.shieldDecay);
+            if(this.shieldHP <= 0) this.maxHp -= 3330;
+        }
+        
+        if(this.stunTimer > 0) {
+            this.stunTimer--;
+            // Quando paralisado, não faz nada
+            if(this.revealed){this.revealTimer--;if(this.revealTimer<=0)this.revealed=false}
+            return;
+        }
+        
+        if(this.type === 'edgar') {
+            this.edgarSuperRechargeTimer++;
+            if(this.edgarSuperRechargeTimer >= 180) {
+                this.superCharge = Math.min(100, this.superCharge + 10);
+                this.edgarSuperRechargeTimer = 0;
+            }
+        }
+
+        if(this.bulldozerFrames > 0) {
+            this.bulldozerFrames--;
+            let nextX = this.x + this.bulldozerVX;
+            let nextY = this.y + this.bulldozerVY;
+            
+            if(!checkWall(nextX, this.y)) this.x = nextX;
+            else this.bulldozerFrames = 0;
+            
+            if(!checkWall(this.x, nextY)) this.y = nextY;
+            else this.bulldozerFrames = 0;
+            
+            for(let i=walls.length-1; i>=0; i--) {
+                let w = walls[i]; 
+                if(!w.isBorder && dist(this.x, this.y, w.x+TILE/2, w.y+TILE/2) < 100) {
+                    walls.splice(i, 1);
+                }
+            }
+            
+            entities.forEach(e => {
+                if(e !== this && !e.dead && dist(this.x, this.y, e.x, e.y) < 70) {
+                    e.takeDamage(this.dmg * 0.8, this);
+                }
+            });
+            return;
+        }
         
         if(this.dashFrames > 0) {
             this.dashFrames--;
-            let hitTarget = false;
-            if(!checkWall(this.x + this.dashVX, this.y)) this.x += this.dashVX;
-            if(!checkWall(this.x, this.y + this.dashVY)) this.y += this.dashVY;
+            let nextX = this.x + this.dashVX;
+            let nextY = this.y + this.dashVY;
+            
+            if(!checkWall(nextX, this.y)) this.x = nextX;
+            if(!checkWall(this.x, nextY)) this.y = nextY;
+            
             entities.forEach(e => {
-                if(e !== this && !e.dead && dist(this.x, this.y, e.x, e.y) < 70) { e.takeDamage(this.dashDmg, this); hitTarget = true; }
+                if(e !== this && !e.dead && dist(this.x, this.y, e.x, e.y) < 70) { 
+                    e.takeDamage(this.dashDmg, this);
+                }
             });
             boxes.forEach(b => {
-                if(!b.dead && dist(this.x, this.y, b.x, b.y) < 80) { b.hp -= this.dashDmg; if(b.hp <= 0) { b.dead = true; drops.push({x:b.x,y:b.y}); } hitTarget = true; }
+                if(!b.dead && dist(this.x, this.y, b.x, b.y) < 80) { 
+                    b.hp -= this.dashDmg; 
+                    if(b.hp <= 0) { b.dead = true; drops.push({x:b.x,y:b.y}); } 
+                }
             });
-            if(hitTarget && this.mortisHasBuff) this.mortisHasBuff = false;
             return; 
         }
 
         let currentReload = this.reloadTime;
-        let speedMult = (this.type === 'mortis' && this.mortisPaX !== null) ? 1.2 : 1.0;
         
-        if(this.ammo<3){this.reloadTimer++; if(this.reloadTimer > Math.max(20, currentReload-this.power*2)){this.ammo++;this.reloadTimer=0}}
+        if(this.ammo<3 && this.attackingTimer <= 0){this.reloadTimer++; if(this.reloadTimer > Math.max(20, currentReload-this.power*2)){this.ammo++;this.reloadTimer=0}}
         if(this.revealed){this.revealTimer--;if(this.revealTimer<=0)this.revealed=false}
         this.regenTimer++;
         if(this.regenTimer > 120) { this.hp = Math.min(this.maxHp, this.hp + (this.inBush ? 100 : 60)); }
         
         let mx=0,my=0;
         if(this.isPlayer){
-            if(joyMove.active){mx=joyMove.x*this.speed*speedMult;my=joyMove.y*this.speed*speedMult}
+            let currentSpeed = this.speedBoostTimer > 0 ? this.speed * 1.5 : this.speed;
+            if(joyMove.active){mx=joyMove.x*currentSpeed;my=joyMove.y*currentSpeed}
             if(joySuper.active && this.superCharge >= 100) this.angle = Math.atan2(joySuper.y, joySuper.x);
             else if(joyShoot.active) this.angle = Math.atan2(joyShoot.y, joyShoot.x);
             else if(joyMove.active) this.angle = Math.atan2(my,mx);
             const btnSuper = document.getElementById('j-super'); const notify = document.getElementById('super-notify');
             if(this.superCharge >= 100) { btnSuper.classList.add('super-ready'); notify.style.display = 'block'; } else { btnSuper.classList.remove('super-ready'); notify.style.display = 'none'; }
-        } else { this.runAI(); mx=Math.cos(this.moveDir)*this.aiSpeed*speedMult; my=Math.sin(this.moveDir)*this.aiSpeed*speedMult; }
+        } else { this.runAI(); mx=Math.cos(this.moveDir)*this.aiSpeed; my=Math.sin(this.moveDir)*this.aiSpeed; }
         if(!checkWall(this.x+mx,this.y))this.x+=mx;if(!checkWall(this.x,this.y+my))this.y+=my;
         this.inBush=false;for(let b of bushes)if(this.x>b.x && this.x<b.x+TILE && this.y>b.y && this.y<b.y+TILE){this.inBush=true;break}
         for(let i=drops.length-1;i>=0;i--)if(dist(this.x,this.y,drops[i].x,drops[i].y)<60){this.power++;this.hp=Math.min(this.hp+400,this.maxHp+400);this.maxHp+=400;drops.splice(i,1);if(this.isPlayer)document.getElementById('ui-power').innerText=this.power}
         if(dist(this.x,this.y,MAP_W/2,MAP_H/2)>gasRadius)this.takeDamage(35,null);
     }
     useGadget() {
-        if(this.gadgetsLeft > 0) {
-            this.gadgetsLeft--;
-            this.immuneTimer = 60;
-            particles.push(new Particle(this.x, this.y, "IMUNE!", "#ffffff"));
-            document.getElementById('btn-gadget').innerText = (this.gadgetsLeft > 0) ? "⚙️" : "❌";
-            if(this.gadgetsLeft <= 0) document.getElementById('btn-gadget').classList.add('disabled');
+        // Shelly - Imunidade, 3 usos, recarrega com 2 supers
+        if(this.type === 'shelly') {
+            if(this.gadgetsLeft > 0 && this.gadgetCooldown <= 0) {
+                this.gadgetsLeft--;
+                this.immuneTimer = 60;
+                particles.push(new Particle(this.x, this.y, "IMUNE!", "#ffffff"));
+                this.updateGadgetUI();
+            }
+        }
+        
+        // Edgar - 1 uso, 20s cooldown, escudo 3330 HP + velocidade
+        else if(this.type === 'edgar') {
+            if(this.gadgetCooldown <= 0) {
+                this.shieldHP = 3330;
+                this.maxHp += 3330;
+                this.hp += 3330;
+                this.shieldDecay = 3330 / (60 * 10); // Dura 10 segundos
+                this.speedBoostTimer = 300; // 5 segundos de velocidade
+                this.gadgetCooldown = 1200; // 20 segundos
+                particles.push(new Particle(this.x, this.y, "ESCUDO!", "#00e5ff"));
+                particles.push(new Particle(this.x, this.y - 50, "VELOCIDADE!", "#ffca28"));
+            }
+        }
+        
+        // Colt - 1 uso, 20s cooldown, míssil teleguiado
+        else if(this.type === 'colt') {
+            if(this.gadgetCooldown <= 0) {
+                // Criar míssil teleguiado
+                let missile = {
+                    x: this.x,
+                    y: this.y,
+                    vx: Math.cos(this.angle) * 15,
+                    vy: Math.sin(this.angle) * 15,
+                    owner: this,
+                    life: 180,
+                    speed: 15,
+                    exploded: false
+                };
+                coltMissiles.push(missile);
+                this.gadgetCooldown = 1200; // 20 segundos
+                particles.push(new Particle(this.x, this.y, "MÍSSIL!", "#4dd0e1"));
+            }
+        }
+        
+        // Bull - 1 uso, 15s cooldown, próximo ataque paralisa
+        else if(this.type === 'bull') {
+            if(this.gadgetCooldown <= 0) {
+                this.bullNextStun = true;
+                this.gadgetCooldown = 900; // 15 segundos
+                particles.push(new Particle(this.x, this.y, "STUN ATIVO!", "#ffb74d"));
+            }
+        }
+        
+        // Juju - 17s cooldown, buff no próximo ataque
+        else if(this.type === 'juju') {
+            if(this.gadgetCooldown <= 0) {
+                this.jujuBuffed = true;
+                this.gadgetCooldown = 1020; // 17 segundos
+                particles.push(new Particle(this.x, this.y, "BUFF!", "#76ff03"));
+            }
+        }
+    }
+    
+    updateGadgetUI() {
+        if(!this.isPlayer) return;
+        let btn = document.getElementById('btn-gadget');
+        if(this.type === 'shelly') {
+            btn.innerText = this.gadgetsLeft > 0 ? `⚙️${this.gadgetsLeft}` : "❌";
+            if(this.gadgetsLeft <= 0) btn.classList.add('disabled');
+            else btn.classList.remove('disabled');
+        } else {
+            if(this.gadgetCooldown > 0) {
+                btn.innerText = Math.ceil(this.gadgetCooldown / 60) + "s";
+                btn.classList.add('disabled');
+            } else {
+                btn.innerText = "⚙️";
+                btn.classList.remove('disabled');
+            }
         }
     }
     runAI(){
@@ -304,84 +672,219 @@ class Brawler {
             let dAlvo=dist(this.x,this.y,this.target.x,this.target.y);
             let a=Math.atan2(this.target.y-this.y,this.target.x-this.x);
             
-            if(this.type === 'mortis') {
-                this.moveDir = a; this.aiSpeed = this.speed; this.angle = a;
-                if(dAlvo < 160 && this.botAttackTimer <= 0) { this.shoot(false, 1); this.botAttackTimer = 40; }
-                if(this.superCharge >= 100 && this.mortisPaX === null) this.shoot(true, 1);
+            if(this.type === 'edgar') {
+                if(dAlvo > 350 && this.superCharge >= 100 && this.botSuperCooldown <= 0) { this.shoot(true, 1); this.botSuperCooldown = 180; }
+                else if(dAlvo < 100) { this.moveDir = a; this.aiSpeed = this.speed; }
+                else if(dAlvo < 150) { this.aiSpeed = 0; }
+                else { this.moveDir = a; this.aiSpeed = this.speed; }
+                this.angle = a;
+                if(this.ammo>0 && this.botAttackTimer <= 0 && dAlvo < 100) { this.shoot(false, 1); this.botAttackTimer = 35; }
             } else {
                 if(dAlvo<300){this.moveDir=a+Math.PI;this.aiSpeed=this.speed} else if(dAlvo>450){this.moveDir=a;this.aiSpeed=this.speed} else {this.aiSpeed=0}
                 this.angle = a;
-                if(this.ammo>0 && this.botAttackTimer <= 0 && Math.random()<0.1) { this.shoot(false, Math.min(1, dAlvo/650)); this.botAttackTimer = 60; }
-                if(this.superCharge>=100) this.shoot(true, 1.0);
+                let attackChance = (this.type === '8bit') ? 0.04 : 0.1;
+                if(this.ammo>0 && this.botAttackTimer <= 0 && Math.random()<attackChance) { this.shoot(false, Math.min(1, dAlvo/650)); this.botAttackTimer = (this.type === '8bit') ? 120 : 60; }
+                if(this.superCharge>=100 && this.botSuperCooldown <= 0) { this.shoot(true, 1.0); this.botSuperCooldown = 300; }
             }
         } else { if(this.decisionTimer<=0){this.decisionTimer=60;this.moveDir=Math.random()*Math.PI*2} this.aiSpeed=this.speed*0.5; this.angle = this.moveDir; }
     }
     shoot(isSuper, joyPowerInput = 1.0){
         if(isSuper) { 
-            if(this.type === 'mortis') {
-                if(this.mortisPaX === null) {
-                    this.mortisPaX = this.x; this.mortisPaY = this.y;
-                    this.superCharge = 0;
-                    particles.push(new Particle(this.x, this.y, "PÁ FINCADA!", "#ffeb3b"));
-                    // AJUSTE: Permite o teletransporte logo em seguida
-                    setTimeout(() => { if(this.mortisPaX !== null) this.superCharge = 100; }, 50);
-                } else {
-                    this.x = this.mortisPaX; this.y = this.mortisPaY;
-                    this.mortisPaX = null; this.mortisPaY = null;
-                    this.mortisHasBuff = true;
-                    this.superCharge = 0;
-                    particles.push(new Particle(this.x, this.y, "BUFF!", "#d50000"));
+            if(this.superCharge < 100) return; 
+            this.superCharge = 0;
+
+            if(this.type === 'edgar') {
+                let tx = this.x + Math.cos(this.angle) * (250 * joyPowerInput);
+                let ty = this.y + Math.sin(this.angle) * (250 * joyPowerInput);
+                if(!checkWall(tx, ty)) { this.x = tx; this.y = ty; }
+                
+                // Paralisia em área
+                particles.push(new Particle(this.x, this.y, "STUN!", "#ffeb3b"));
+                for(let e of entities) {
+                    if(e !== this && !e.dead && dist(this.x, this.y, e.x, e.y) < 200) {
+                        e.stunTimer = 84; // 1.4 segundos (60fps * 1.4)
+                        particles.push(new Particle(e.x, e.y - 50, "PARALIZADO!", "#ff5252"));
+                    }
                 }
+                
+                // Escudo de 1000 HP
+                this.hp = Math.min(this.maxHp + 1000, this.hp + 1000);
+                this.maxHp += 1000;
+                particles.push(new Particle(this.x, this.y - 70, "+1000 ESCUDO", "#00e5ff"));
+                
+                // Buff de velocidade por 5 segundos
+                this.speedBoostTimer = 300; // 5 segundos (60fps * 5)
+                particles.push(new Particle(this.x, this.y - 90, "VELOCIDADE!", "#ffca28"));
+                
                 return;
             }
-            if(this.superCharge < 100) return; this.superCharge = 0; 
-        } else { if(this.ammo <= 0) return; this.ammo--; }
+
+            if(this.type === 'juju') {
+                entities.forEach(e => { if(e !== this) e.markedTimer = 60; });
+                bullets.push(new Bullet(this.x + Math.cos(this.angle)*(650*joyPowerInput), this.y + Math.sin(this.angle)*(650*joyPowerInput), 0, 0, 300, 70, this, false, false, false, true));
+                return;
+            }
+
+            if(this.type === 'bull') {
+                let maxDist = 750 * joyPowerInput;
+                let speed = 25;
+                this.bulldozerFrames = Math.floor(maxDist / speed);
+                this.bulldozerVX = Math.cos(this.angle) * speed;
+                this.bulldozerVY = Math.sin(this.angle) * speed;
+                return;
+            }
+
+            if(this.type === 'shelly') { 
+                let sA = this.angle - 0.2; 
+                let totalDmg = this.dmg * (1 + this.power * 0.1);
+                for(let i=0; i<5; i++) bullets.push(new Bullet(this.x, this.y, sA + (i*0.1), 20, 60, totalDmg*1.5, this, true)); 
+                return; 
+            }
+
+            if(this.type === '8bit'){ 
+                // Contar torretas do jogador
+                let playerTurrets = turrets.filter(t => t.owner === this);
+                
+                if(playerTurrets.length >= 1) {
+                    // Remover a torreta mais antiga
+                    let oldestTurret = playerTurrets[0];
+                    oldestTurret.dead = true;
+                    particles.push(new Particle(oldestTurret.x, oldestTurret.y, "REMOVIDA!", "#ff5252"));
+                }
+                
+                // Criar nova torreta na posição do jogador
+                turrets.push(new Turret(this.x, this.y, this));
+                particles.push(new Particle(this.x, this.y, "TORRETA!", "#7e57c2"));
+                return; 
+            }
+        } else { 
+            if(this.ammo <= 0) return; 
+            this.ammo--;
+            this.attackingTimer = 30;
+        }
         
-        this.regenTimer=0; if(this.inBush){this.revealed=true;this.revealTimer=120}
+        this.regenTimer=0; 
+        if(this.inBush){this.revealed=true;this.revealTimer=120}
         let totalDmg = this.dmg*(1+this.power*0.1); 
         
         if(this.type === 'mortis') {
-            let dmgFinal = totalDmg * (this.mortisHasBuff ? 2.1 : 1.0);
-            this.dashFrames = 8;
-            this.dashVX = Math.cos(this.angle) * 40;
-            this.dashVY = Math.sin(this.angle) * 40;
-            this.dashDmg = dmgFinal / 4; 
+            if(this.dashCooldown > 0) return;
+            this.dashCooldown = 15; // Reduzir cooldown
+            this.dashFrames = 12; // Dash mais longo
+            this.dashVX = Math.cos(this.angle) * 35; // Velocidade ajustada
+            this.dashVY = Math.sin(this.angle) * 35;
+            this.dashDmg = totalDmg / 3; // Mais dano por frame
             return;
         }
 
-        if(this.type === 'edgar' && isSuper) {
-            let tx = this.x + Math.cos(this.angle) * (250 * joyPowerInput);
-            let ty = this.y + Math.sin(this.angle) * (250 * joyPowerInput);
-            if(!checkWall(tx, ty)) { this.x = tx; this.y = ty; }
-            bullets.push(new Bullet(this.x, this.y, 0, 0, 5, 1000, this));
+        if(this.type === 'edgar') {
+            if(this.punchCooldown > 0) return;
+            this.punchCooldown = 10; // Reduzir cooldown para socar mais rápido
+            
+            punchEffects.push(new PunchEffect(this.x, this.y, this.angle));
+            
+            let hitSomeone = false;
+            let punchRange = 120; // Alcance maior
+            
+            // Acertar inimigos
+            entities.forEach(e => {
+                if(e !== this && !e.dead && dist(this.x, this.y, e.x, e.y) < punchRange) {
+                    let angleToEnemy = Math.atan2(e.y - this.y, e.x - this.x);
+                    let angleDiff = Math.abs(angleToEnemy - this.angle);
+                    if(angleDiff > Math.PI) angleDiff = 2 * Math.PI - angleDiff;
+                    
+                    if(angleDiff < 1.2) { // Ângulo de ataque maior
+                        e.takeDamage(totalDmg, this);
+                        this.hp = Math.min(this.maxHp, this.hp + 200);
+                        hitSomeone = true;
+                        particles.push(new Particle(e.x, e.y - 50, "POW!", "#ff5252"));
+                    }
+                }
+            });
+            
+            // Acertar caixas
+            boxes.forEach(b => {
+                if(!b.dead && dist(this.x, this.y, b.x, b.y) < punchRange) {
+                    let angleToBox = Math.atan2(b.y - this.y, b.x - this.x);
+                    let angleDiff = Math.abs(angleToBox - this.angle);
+                    if(angleDiff > Math.PI) angleDiff = 2 * Math.PI - angleDiff;
+                    
+                    if(angleDiff < 1.2) {
+                        b.hp -= totalDmg;
+                        if(b.hp <= 0) {
+                            b.dead = true;
+                            drops.push({x: b.x, y: b.y});
+                        }
+                        hitSomeone = true;
+                        particles.push(new Particle(b.x, b.y - 50, "BOOM!", "#ffeb3b"));
+                    }
+                }
+            });
+            
+            if(hitSomeone) particles.push(new Particle(this.x, this.y, "+200 HP", "#00ff00"));
             return;
         }
-        if(this.type === 'juju' && isSuper) {
-            entities.forEach(e => { if(e !== this) e.markedTimer = 60; });
-            bullets.push(new Bullet(this.x + Math.cos(this.angle)*(650*joyPowerInput), this.y + Math.sin(this.angle)*(650*joyPowerInput), 0, 0, 300, 9, this, false, false, false, true));
-            return;
-        }
-        if(this.type === 'bull' && isSuper) { let sA = this.angle - 0.2; for(let i=0; i<5; i++) bullets.push(new Bullet(this.x, this.y, sA + (i*0.1), 20, 60, totalDmg*1.5, this, true)); return; }
+
         if(this.type === '8bit'){ 
-            let s=0; let maxB = isSuper ? 16 : 7;
-            let it=setInterval(()=>{ 
-                if(this.dead||s>=maxB){clearInterval(it);return} 
-                bullets.push(new Bullet(this.x,this.y,this.angle+(Math.random()-0.5)*0.1,25,this.rangeMult,totalDmg*(isSuper?1.5:1),this));
-                s++ 
-            },60); return; 
+            let shootAngle = this.angle;
+            let s = 0;
+            let it = setInterval(() => {
+                if(this.dead || s >= 6) { clearInterval(it); return; }
+                bullets.push(new Bullet(this.x, this.y, shootAngle + (Math.random()-0.5)*0.05, 25, this.rangeMult, totalDmg, this));
+                s++;
+            }, 150);
+            return; 
         }
+
         let count = this.bullets; let sA=this.angle-(this.spread/2), step=count>1?this.spread/(count-1):0;
         for(let i=0;i<count;i++) {
-            if(this.isLobber) bullets.push(new Bullet(this.x, this.y, sA+(step*i), 15, Math.max(10, Math.floor(43 * joyPowerInput)), totalDmg, this, false, true));
-            else bullets.push(new Bullet(this.x,this.y,sA+(step*i),25,this.rangeMult,totalDmg,this));
+            let stunDur = 0;
+            if(this.type === 'bull' && this.bullNextStun) {
+                stunDur = 90; // 1.5 segundos
+                if(i === 0) this.bullNextStun = false; // Só na primeira bala
+            }
+            
+            if(this.isLobber) {
+                let dmgMult = (this.type === 'juju' && this.jujuBuffed) ? 1.3 : 1;
+                let rangeMult = (this.type === 'juju' && this.jujuBuffed) ? 1.5 : 1;
+                bullets.push(new Bullet(this.x, this.y, sA+(step*i), 15, Math.max(10, Math.floor(43 * joyPowerInput * rangeMult)), totalDmg * dmgMult, this, false, true, false, false, stunDur));
+                if(this.jujuBuffed) this.jujuBuffed = false;
+            }
+            else bullets.push(new Bullet(this.x,this.y,sA+(step*i),25,this.rangeMult,totalDmg,this,false,false,false,false,stunDur));
         }
     }
     takeDamage(d, attacker){
         if(this.immuneTimer > 0) return;
+        
+        // Proteger com escudo do Edgar
+        if(this.shieldHP > 0) {
+            let dmgToShield = Math.min(d, this.shieldHP);
+            this.shieldHP -= dmgToShield;
+            d -= dmgToShield;
+            if(this.shieldHP <= 0) this.maxHp -= 3330;
+            if(d <= 0) {
+                particles.push(new Particle(this.x,this.y-50,"BLOQUEADO!","#00e5ff"));
+                return;
+            }
+        }
+        
         this.hp-=d; this.regenTimer=0; if(!this.dead) particles.push(new Particle(this.x,this.y-50,Math.floor(d),"#ff1744"));
         if(attacker) { 
-            let charge = (attacker.type === 'mortis') ? 8 : 16;
-            attacker.superCharge = Math.min(100, attacker.superCharge + charge); 
+            let oldCharge = attacker.superCharge;
+            let charge = (attacker.type === 'edgar') ? 12 : 16;
+            attacker.superCharge = Math.min(100, attacker.superCharge + charge);
+            
+            // Shelly - recarregar gadgets ao carregar 2 supers
+            if(attacker.type === 'shelly' && oldCharge < 100 && attacker.superCharge >= 100) {
+                attacker.supersForGadget++;
+                if(attacker.supersForGadget >= 2) {
+                    attacker.gadgetsLeft = 3;
+                    attacker.supersForGadget = 0;
+                    particles.push(new Particle(attacker.x, attacker.y - 80, "GADGETS!", "#f06292"));
+                    if(attacker.isPlayer) attacker.updateGadgetUI();
+                }
+            }
+            
             if(!this.isPlayer){ this.target=attacker; this.botAttackTimer=20; } 
         }
         if(this.hp<=0) this.die();
@@ -393,20 +896,21 @@ class Brawler {
     }
     draw(){
         if(this.dead)return; 
-        if(this.mortisPaX !== null) {
-            ctx.save(); ctx.translate(this.mortisPaX - cam.x, this.mortisPaY - cam.y);
-            ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.beginPath(); ctx.arc(0,0, 40, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = "#333"; ctx.fillRect(-5, -30, 10, 40); ctx.fillRect(-15, -35, 30, 8);
-            ctx.restore();
-        }
         if(this.inBush&&!this.isPlayer&&!this.revealed&&dist(this.x,this.y,player.x,player.y)>220 && this.markedTimer <= 0) return;
+        
         ctx.save(); ctx.translate(this.x,this.y);
+        if(this.stunTimer > 0) {
+            ctx.beginPath(); ctx.arc(0,0, 70, 0, Math.PI*2); 
+            ctx.strokeStyle = "#ff1744"; ctx.lineWidth = 5; ctx.stroke();
+            ctx.fillStyle = "rgba(255, 23, 68, 0.4)"; ctx.fill();
+            ctx.fillStyle = "#fff"; ctx.font = "bold 20px Arial"; ctx.textAlign = "center";
+            ctx.fillText("⚡STUN⚡", 0, 5);
+        }
         if(this.immuneTimer > 0) {
             ctx.beginPath(); ctx.arc(0,0, 60, 0, Math.PI*2); 
             ctx.strokeStyle = "#ffff00"; ctx.lineWidth = 4; ctx.stroke();
             ctx.fillStyle = "rgba(255, 255, 0, 0.3)"; ctx.fill();
         }
-        if(this.mortisHasBuff) { ctx.beginPath(); ctx.arc(0,0, 50, 0, Math.PI*2); ctx.fillStyle = "rgba(255, 0, 0, 0.2)"; ctx.fill(); ctx.strokeStyle = "red"; ctx.lineWidth = 2; ctx.stroke(); }
         if(this.markedTimer > 0) { ctx.fillStyle = "#ffca28"; ctx.beginPath(); ctx.moveTo(0, -130); ctx.lineTo(-15, -150); ctx.lineTo(15, -150); ctx.fill(); }
         if(this.inBush)ctx.globalAlpha=0.5;
         ctx.fillStyle="#111"; ctx.fillRect(-60,-95,120,15);
@@ -429,7 +933,7 @@ function checkWall(x,y){for(let w of walls)if(x>w.x&&x<w.x+w.w&&y>w.y&&y<w.y+w.h
 
 function startGame(){
     document.querySelectorAll('.menu-screen').forEach(s=>s.style.display='none');document.getElementById('ui-layer').style.display='block';
-    currentMap=MAPS[0]; walls=[]; bushes=[]; boxes=[]; spawns=[]; entities=[]; drops=[]; bullets=[]; particles=[];
+    currentMap=MAPS[0]; walls=[]; bushes=[]; boxes=[]; spawns=[]; entities=[]; drops=[]; bullets=[]; particles=[]; punchEffects=[]; turrets=[]; ducks=[]; coltMissiles=[];
     let grid=currentMap.grid; MAP_W=grid[0].length*TILE; MAP_H=grid.length*TILE; gasRadius=MAP_W * 0.8;
     for(let y=0;y<grid.length;y++)for(let x=0;x<grid[0].length;x++){
         let t=grid[y][x],px=x*TILE,py=y*TILE;
@@ -439,7 +943,7 @@ function startGame(){
         if(t==='S')spawns.push({x:px+TILE/2,y:py+TILE/2});
     }
     spawns.sort(()=>Math.random()-0.5); player=new Brawler(spawns[0].x,spawns[0].y,selectedBrawlerKey,true); entities.push(player);
-    let types=['shelly','edgar','colt','bull','8bit','juju','mortis']; for(let i=1;i<spawns.length&&i<=9;i++)entities.push(new Brawler(spawns[i].x,spawns[i].y,types[Math.floor(Math.random()*types.length)],false));
+    let types=['shelly','edgar','colt','bull','8bit','juju']; for(let i=1;i<spawns.length&&i<=9;i++)entities.push(new Brawler(spawns[i].x,spawns[i].y,types[Math.floor(Math.random()*types.length)],false));
     survivors=entities.length; document.getElementById('ui-alive').innerText=survivors; gameActive=true; paused=false; loop();
     document.getElementById('btn-gadget').innerText = "⚙️";
     document.getElementById('btn-gadget').classList.remove('disabled');
@@ -450,25 +954,233 @@ function endGame(win){gameActive=false;document.getElementById('endScreen').styl
 
 function loop(){
     if(!gameActive)return; requestAnimationFrame(loop); if(paused)return; gasRadius-=0.8;
-    entities.forEach(e=>e.update()); bullets.forEach((b,i)=>{b.update();if(b.life<=0)bullets.splice(i,1)}); particles.forEach((p,i)=>{p.update();if(p.life<=0)particles.splice(i,1)});
+    entities.forEach(e=>e.update()); 
+    
+    // Atualizar UI do gadget
+    if(player && !player.dead) player.updateGadgetUI();
+    
+    bullets.forEach((b,i)=>{
+        b.update();
+        if(b.isBat && b.hitSomething && b.owner && !b.owner.dead) {
+            b.owner.hp = Math.min(b.owner.maxHp, b.owner.hp + b.healOwner);
+            particles.push(new Particle(b.owner.x, b.owner.y - 60, `+${b.healOwner}`, "#00ff00"));
+        }
+        if(b.life<=0)bullets.splice(i,1)
+    }); 
+    
+    turrets.forEach((t,i)=>{
+        t.update();
+        // Torretas podem receber dano de balas
+        for(let b of bullets) {
+            if(b.owner !== t.owner && dist(t.x, t.y, b.x, b.y) < 60) {
+                t.takeDamage(b.dmg);
+                b.life = 0;
+            }
+        }
+        if(t.dead) turrets.splice(i,1);
+    });
+    
+    ducks.forEach((d,i)=>{
+        d.update();
+        // Patos podem receber dano de balas
+        for(let b of bullets) {
+            if(b.owner !== d.owner && dist(d.x, d.y, b.x, b.y) < 30) {
+                d.takeDamage(b.dmg);
+                b.life = 0;
+            }
+        }
+        if(d.dead) ducks.splice(i,1);
+    });
+    
+    punchEffects.forEach((p,i)=>{p.update();if(p.life<=0)punchEffects.splice(i,1)});
+    particles.forEach((p,i)=>{p.update();if(p.life<=0)particles.splice(i,1)});
     cam.x=Math.max(0,Math.min(player.x-cvs.width/2,MAP_W-cvs.width));cam.y=Math.max(0,Math.min(player.y-cvs.height/2,MAP_H-cvs.height));
     ctx.fillStyle="#000";ctx.fillRect(0,0,cvs.width,cvs.height);ctx.save();ctx.translate(-cam.x,-cam.y);
     ctx.fillStyle=currentMap.color;ctx.fillRect(0,0,MAP_W,MAP_H);
     ctx.fillStyle=currentMap.bushColor;bushes.forEach(b=>ctx.fillRect(b.x,b.y,b.w,b.h));
     drops.forEach(d=>{ctx.fillStyle="#00e5ff";ctx.fillRect(d.x-15,d.y-15,30,30)});
     boxes.forEach(b=>{if(b.dead)return;ctx.fillStyle="#ffb74d";ctx.fillRect(b.x-45,b.y-45,90,90);ctx.fillStyle="#000";ctx.fillRect(b.x-35,b.y-60,70,8);ctx.fillStyle="#0f0";ctx.fillRect(b.x-35,b.y-60,70*(b.hp/5000),8)});
-    entities.sort((a,b)=>a.y-b.y).forEach(e=>e.draw()); bullets.forEach(b=>b.draw()); particles.forEach(p=>p.draw());
+    turrets.forEach(t=>t.draw());
+    ducks.forEach(d=>d.draw());
+    entities.sort((a,b)=>a.y-b.y).forEach(e=>e.draw()); 
+    
     walls.forEach(w=>{ ctx.fillStyle=w.isBorder?"#222":currentMap.wallColor; ctx.fillRect(w.x,w.y,w.w,w.h); if(w.isBorder){ctx.strokeStyle="#444";ctx.lineWidth=4;ctx.strokeRect(w.x,w.y,w.w,w.h)} });
+    
+    bullets.forEach(b=>b.draw()); 
+    punchEffects.forEach(p=>p.draw());
+    particles.forEach(p=>p.draw());
+    
+    if(player && !player.dead) {
+        if(joyShoot.active) {
+            if(player.type === 'juju') {
+                let distJuju = 650 * joyShoot.power;
+                let tx = player.x + Math.cos(player.angle) * distJuju;
+                let ty = player.y + Math.sin(player.angle) * distJuju;
+                
+                ctx.fillStyle = "rgba(118, 255, 3, 0.2)";
+                ctx.beginPath();
+                ctx.arc(tx, ty, 160, 0, Math.PI*2);
+                ctx.fill();
+                
+                ctx.strokeStyle = "#76ff03";
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                ctx.strokeStyle = "rgba(118, 255, 3, 0.5)";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(player.x, player.y);
+                ctx.lineTo(tx, ty);
+                ctx.stroke();
+            } else if(player.type === 'edgar') {
+                ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+                ctx.beginPath();
+                ctx.moveTo(player.x, player.y);
+                ctx.arc(player.x, player.y, 90, player.angle - 0.8, player.angle + 0.8);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            } else if(player.type === '8bit') {
+                let maxRange = player.rangeMult * 10;
+                ctx.strokeStyle = "rgba(126, 87, 194, 0.4)";
+                ctx.lineWidth = 2;
+                for(let i = 0; i < 7; i++) {
+                    let lineAngle = player.angle + (i - 3) * 0.015;
+                    let tx = player.x + Math.cos(lineAngle) * maxRange;
+                    let ty = player.y + Math.sin(lineAngle) * maxRange;
+                    ctx.beginPath();
+                    ctx.moveTo(player.x, player.y);
+                    ctx.lineTo(tx, ty);
+                    ctx.stroke();
+                }
+            } else if(player.type === 'shelly' || player.type === 'bull') {
+                let maxRange = player.rangeMult * 10;
+                ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+                ctx.beginPath();
+                ctx.moveTo(player.x, player.y);
+                ctx.arc(player.x, player.y, maxRange, player.angle - player.spread/2, player.angle + player.spread/2);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            } else if(player.type === 'colt') {
+                let maxRange = player.rangeMult * 10;
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(player.x, player.y);
+                ctx.lineTo(player.x + Math.cos(player.angle) * maxRange, player.y + Math.sin(player.angle) * maxRange);
+                ctx.stroke();
+            }
+        }
+        
+        if(joySuper.active && player.superCharge >= 100) {
+            if(player.type === 'edgar') {
+                let dist = 250 * joySuper.power;
+                let tx = player.x + Math.cos(player.angle) * dist;
+                let ty = player.y + Math.sin(player.angle) * dist;
+                
+                ctx.fillStyle = "rgba(255, 235, 59, 0.3)";
+                ctx.beginPath();
+                ctx.arc(tx, ty, 60, 0, Math.PI*2);
+                ctx.fill();
+                
+                ctx.strokeStyle = "#ffeb3b";
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            } else if(player.type === 'juju') {
+                let dist = 650 * joySuper.power;
+                let tx = player.x + Math.cos(player.angle) * dist;
+                let ty = player.y + Math.sin(player.angle) * dist;
+                
+                ctx.fillStyle = "rgba(255, 235, 59, 0.3)";
+                ctx.beginPath();
+                ctx.arc(tx, ty, 250, 0, Math.PI*2);
+                ctx.fill();
+                
+                ctx.strokeStyle = "#ffeb3b";
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            } else if(player.type === 'bull') {
+                let maxDist = 750 * joySuper.power;
+                let tx = player.x + Math.cos(player.angle) * maxDist;
+                let ty = player.y + Math.sin(player.angle) * maxDist;
+                
+                ctx.strokeStyle = "rgba(255, 183, 77, 0.5)";
+                ctx.lineWidth = 60;
+                ctx.beginPath();
+                ctx.moveTo(player.x, player.y);
+                ctx.lineTo(tx, ty);
+                ctx.stroke();
+                
+                ctx.strokeStyle = "#ffb74d";
+                ctx.lineWidth = 4;
+                ctx.stroke();
+            }
+        }
+    }
+    
     ctx.strokeStyle="rgba(0,255,0,0.3)";ctx.lineWidth=1500;ctx.beginPath();ctx.arc(MAP_W/2,MAP_H/2,gasRadius+750,0,Math.PI*2);ctx.stroke();ctx.restore();
 }
 
 function handleJoy(e,j,isP){
     if(paused)return; e.preventDefault();
-    if(!isP){ if(j.active){ if(j.id === 'j-super') player.shoot(true, j.power); else if(j.id === 'j-shoot') player.shoot(false, j.power); } j.active=false;j.x=0;j.y=0;j.power=0;document.getElementById(j.stick).style.transform=`translate(-50%,-50%)`; return; }
+    if(!isP){ 
+        if(j.active){ 
+            if(j.id === 'j-super') player.shoot(true, j.power); 
+            else if(j.id === 'j-shoot') player.shoot(false, j.power); 
+        } 
+        j.active=false;j.x=0;j.y=0;j.power=0;j.justTouched=false;
+        document.getElementById(j.stick).style.transform=`translate(-50%,-50%)`; 
+        return; 
+    }
+    
+    // Auto-fire só quando o botão de tiro é TOCADO pela primeira vez
+    let wasJustTouched = !j.active; // Se não estava ativo, acabou de tocar
+    
     let t=e.targetTouches[0],r=e.currentTarget.getBoundingClientRect(),dx=t.clientX-(r.left+r.width/2),dy=t.clientY-(r.top+r.height/2);
     let distVal=Math.min(Math.hypot(dx,dy),50),ang=Math.atan2(dy,dx);
     j.active=true;j.x=Math.cos(ang);j.y=Math.sin(ang);j.power=distVal/50;
     document.getElementById(j.stick).style.transform=`translate(calc(-50% + ${Math.cos(ang)*distVal}px), calc(-50% + ${Math.sin(ang)*distVal}px))`;
+    
+    // Auto-fire após atualizar o joystick
+    if(j.id === 'j-shoot' && wasJustTouched && player) {
+        let closestTarget = null;
+        let closestDist = Infinity;
+        
+        // Procura inimigos
+        for(let e of entities) {
+            if(e !== player && !e.dead) {
+                let d = dist(player.x, player.y, e.x, e.y);
+                if(d < closestDist && d < 600) {
+                    closestDist = d;
+                    closestTarget = e;
+                }
+            }
+        }
+        
+        // Procura caixas se não achou inimigo próximo
+        if(!closestTarget) {
+            for(let b of boxes) {
+                if(!b.dead) {
+                    let d = dist(player.x, player.y, b.x, b.y);
+                    if(d < closestDist && d < 600) {
+                        closestDist = d;
+                        closestTarget = b;
+                    }
+                }
+            }
+        }
+        
+        if(closestTarget) {
+            player.angle = Math.atan2(closestTarget.y - player.y, closestTarget.x - player.x);
+        }
+    }
 }
 [joyMove, joyShoot, joySuper].forEach(j=>{ let el=document.getElementById(j.id); el.addEventListener('touchstart',e=>handleJoy(e,j,true)); el.addEventListener('touchmove',e=>handleJoy(e,j,true)); el.addEventListener('touchend',e=>handleJoy(e,j,false)); });
 
