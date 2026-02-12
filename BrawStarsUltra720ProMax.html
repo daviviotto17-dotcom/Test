@@ -14,10 +14,10 @@
         .btn-pause { pointer-events: auto; background: #d32f2f; border: 3px solid #fff; width: 50px; height: 50px; border-radius: 50%; color: white; font-size: 22px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 0 #b71c1c; }
         #super-notify { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); font-family: 'Black Ops One'; font-size: 40px; color: #ffeb3b; text-shadow: 0 0 10px #ffc107, 4px 4px 0 #000; display: none; animation: pulse 0.5s infinite alternate; pointer-events: none; }
         @keyframes pulse { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -50%) scale(1.2); } }
-        .joy-zone { position: absolute; width: 140px; height: 140px; pointer-events: auto; z-index: 100; }
-        #j-move { bottom: 40px; left: 40px; } 
-        #j-shoot { bottom: 40px; right: 40px; }
-        #j-super { bottom: 160px; right: 60px; width: 100px; height: 100px; opacity: 0.5; pointer-events: none; transition: 0.3s; }
+        .joy-zone { position: fixed; width: 140px; height: 140px; pointer-events: none; z-index: 100; transition: opacity 0.1s; opacity: 0; transform: translate(-50%, -50%); }
+        #j-move { opacity: 0; } 
+        #j-shoot { opacity: 0; }
+        #j-super { bottom: 160px; right: 60px; width: 100px; height: 100px; opacity: 0.5; pointer-events: none; transition: 0.3s; position: absolute; }
         #j-super.super-ready { opacity: 1; pointer-events: auto; filter: drop-shadow(0 0 10px #ffeb3b); }
         .btn-gadget { position: absolute; bottom: 180px; right: 180px; width: 70px; height: 70px; background: #6eff95; border: 4px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; pointer-events: auto; box-shadow: 0 0 10px #000; z-index: 105; cursor: pointer; }
         .btn-gadget.disabled { opacity: 0.3; pointer-events: none; background: #555; }
@@ -64,14 +64,93 @@
 <div id="infoScreen" class="menu-screen">
     <button class="btn-back" onclick="goToSelection()"> < </button>
     <div class="info-content">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(5);"><canvas id="infoCanvas" width="100" height="100"></canvas></div>
-        <div class="info-left-text"><h1 id="infoName" style="font-family:'Black Ops One'; font-size:50px; margin:0; text-transform:uppercase;">SHELLY</h1><p id="infoDesc" style="font-size:14px; color:#e3f2fd;"></p></div>
-        <div class="info-stats-box">
-            <div class="stat-row">SAÚDE <span id="infoHp" style="float:right"></span></div>
-            <div class="stat-row">ATAQUE <span id="infoDmg" style="float:right"></span></div>
-            <div class="stat-row">SUPER <span id="infoSuper" style="float:right; color:#ffeb3b"></span></div>
+        <!-- Título -->
+        <h1 style="text-align:center; font-family:'Black Ops One'; font-size:48px; margin:20px 0; color:#fff; text-shadow: 0 4px 8px rgba(0,0,0,0.5);">ESTATÍSTICAS DO BRAWLER</h1>
+        
+        <!-- Container principal -->
+        <div style="display:flex; gap:30px; padding:20px; max-width:1200px; margin:0 auto;">
+            <!-- Coluna esquerda - Estatísticas básicas -->
+            <div style="flex:1; background:rgba(13,71,161,0.8); border-radius:15px; padding:25px; border:3px solid #1976d2;">
+                <!-- Saúde e Velocidade -->
+                <div style="display:flex; gap:15px; margin-bottom:20px;">
+                    <div style="flex:1; background:rgba(76,175,80,0.3); border-radius:10px; padding:15px; border:2px solid #4caf50;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div style="font-size:32px;">❤️</div>
+                            <div>
+                                <div style="font-size:12px; color:#aaa;">Saúde</div>
+                                <div id="infoHp" style="font-size:24px; font-weight:bold; color:#fff;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="flex:1; background:rgba(33,150,243,0.3); border-radius:10px; padding:15px; border:2px solid #2196f3;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div style="font-size:32px;">⚡</div>
+                            <div>
+                                <div style="font-size:12px; color:#aaa;">Velocidade de movimento</div>
+                                <div id="infoSpeed" style="font-size:20px; font-weight:bold; color:#fff;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Ataque -->
+                <div style="background:rgba(244,67,54,0.3); border-radius:10px; padding:20px; margin-bottom:20px; border:2px solid #f44336;">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                        <div style="font-size:32px;">💥</div>
+                        <div style="font-size:24px; font-weight:bold; color:#f44336;">ATAQUE</div>
+                    </div>
+                    <div id="infoAttackName" style="font-size:18px; font-weight:bold; margin-bottom:10px; color:#fff;"></div>
+                    <div id="infoAttackDesc" style="font-size:14px; color:#e3f2fd; margin-bottom:15px; line-height:1.5;"></div>
+                    <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                        <div style="background:rgba(0,0,0,0.3); padding:10px 15px; border-radius:8px;">
+                            <div style="font-size:11px; color:#aaa;">Dano</div>
+                            <div id="infoDmg" style="font-size:18px; font-weight:bold; color:#fff;"></div>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.3); padding:10px 15px; border-radius:8px;">
+                            <div style="font-size:11px; color:#aaa;">Alcance</div>
+                            <div id="infoRange" style="font-size:18px; font-weight:bold; color:#fff;"></div>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.3); padding:10px 15px; border-radius:8px;">
+                            <div style="font-size:11px; color:#aaa;">Velocidade de recarga</div>
+                            <div id="infoReload" style="font-size:18px; font-weight:bold; color:#fff;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Super -->
+                <div style="background:rgba(255,235,59,0.3); border-radius:10px; padding:20px; border:2px solid #ffeb3b;">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                        <div style="font-size:32px;">⭐</div>
+                        <div style="font-size:24px; font-weight:bold; color:#ffeb3b;">SUPER</div>
+                    </div>
+                    <div id="infoSuperName" style="font-size:18px; font-weight:bold; margin-bottom:10px; color:#fff;"></div>
+                    <div id="infoSuperDesc" style="font-size:14px; color:#e3f2fd; line-height:1.5;"></div>
+                </div>
+            </div>
+            
+            <!-- Coluna direita - Personagem e Gadget -->
+            <div style="flex:1; display:flex; flex-direction:column; gap:20px;">
+                <!-- Personagem grande -->
+                <div style="background:rgba(13,71,161,0.8); border-radius:15px; padding:20px; border:3px solid #1976d2; text-align:center;">
+                    <div id="infoName" style="font-family:'Black Ops One'; font-size:40px; margin-bottom:15px; color:#fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"></div>
+                    <div style="width:300px; height:300px; margin:0 auto; position:relative;">
+                        <canvas id="infoCanvas" width="300" height="300" style="transform:scale(2.5);"></canvas>
+                    </div>
+                    <div id="infoDesc" style="font-size:16px; color:#e3f2fd; margin-top:15px; font-style:italic;"></div>
+                </div>
+                
+                <!-- Gadget -->
+                <div style="background:rgba(156,39,176,0.3); border-radius:10px; padding:20px; border:2px solid #9c27b0;">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                        <div style="font-size:32px;">🔧</div>
+                        <div style="font-size:24px; font-weight:bold; color:#ce93d8;">ACESSÓRIO</div>
+                    </div>
+                    <div id="infoGadgetDesc" style="font-size:14px; color:#e3f2fd; line-height:1.5;"></div>
+                </div>
+            </div>
         </div>
-        <button class="btn-select-confirm" onclick="selectBrawler()">SELECIONAR</button>
+        
+        <button class="btn-select-confirm" onclick="selectBrawler()" style="margin:20px auto; display:block;">SELECIONAR</button>
     </div>
 </div>
 
@@ -102,12 +181,49 @@ cvs.width = window.innerWidth;
 cvs.height = window.innerHeight;
 
 const BRAWLERS = {
-    shelly: { name: "SHELLY", hp: 4000, speed: 6.5, bullets: 5, spread: 0.35, range: 48, reload: 45, dmg: 340, color: "#f06292", desc: "Rajada de chumbo grosso.", superName: "SUPERBALA" },
-    edgar: { name: "EDGAR", hp: 3800, speed: 8.2, bullets: 2, spread: 0.2, range: 7, reload: 15, dmg: 1600, color: "#212121", desc: "Salto e socos.", superName: "SALTO" },
-    colt: { name: "COLT", hp: 3200, speed: 7.5, bullets: 1, spread: 0.02, range: 90, reload: 35, dmg: 820, color: "#4dd0e1", desc: "Atirador de elite.", superName: "TREM-BALA" }, 
-    bull: { name: "BULL", hp: 6000, speed: 5.1, bullets: 4, spread: 0.45, range: 20, reload: 67, dmg: 699, color: "#ffb74d", desc: "Tanque agressivo.", superName: "BULLDOZER" },
-    '8bit': { name: "8-BIT", hp: 5200, speed: 4.8, bullets: 6, spread: 0.05, range: 108, reload: 144, dmg: 680, color: "#7e57c2", desc: "Poderoso e lento.", superName: "TORRETA" },
-    juju: { name: "JUJU", hp: 3800, speed: 6.8, bullets: 1, spread: 0.0, range: 650, reload: 55, dmg: 1400, color: "#76ff03", desc: "Magia de área. Super: Aura do Vazio.", superName: "O VAZIO", isLobber: true }
+    shelly: { 
+        name: "SHELLY", hp: 4000, speed: 6.5, bullets: 5, spread: 0.35, range: 48, reload: 45, dmg: 340, color: "#f06292", 
+        desc: "Rajada de chumbo grosso.", 
+        superName: "SUPERBALA", 
+        superDesc: "Rajada devastadora que quebra paredes",
+        gadgetDesc: "Imunidade por 1s. 3 usos, recarrega a cada 2 supers"
+    },
+    edgar: { 
+        name: "EDGAR", hp: 3800, speed: 8.2, bullets: 2, spread: 0.2, range: 7, reload: 15, dmg: 1600, color: "#212121", 
+        desc: "Salto e socos.", 
+        superName: "SALTO", 
+        superDesc: "Salta, paralisa inimigos, ganha escudo 1000HP e velocidade",
+        gadgetDesc: "Escudo 3330HP (10s) + velocidade. Recarrega em 20s"
+    },
+    piper: { 
+        name: "PIPER", hp: 3200, speed: 7.5, bullets: 1, spread: 0, range: 140, reload: 35, dmg: 820, color: "#ff69b4", 
+        desc: "Atiradora de longo alcance. Mais dano à distância!", 
+        superName: "VOO + GRANADA", 
+        superDesc: "Voa até o alvo e solta granada explosiva no ponto de partida!",
+        gadgetDesc: "Próximo tiro: +1300 dano. Recarrega em 20s"
+    }, 
+    bull: { 
+        name: "BULL", hp: 6000, speed: 5.1, bullets: 4, spread: 0.45, range: 20, reload: 67, dmg: 699, color: "#ffb74d", 
+        desc: "Tanque agressivo.", 
+        superName: "BULLDOZER", 
+        superDesc: "Carga que quebra paredes e causa dano",
+        gadgetDesc: "Próximo ataque paralisa 1.5s. Recarrega em 15s"
+    },
+    '8bit': { 
+        name: "8-BIT", hp: 5200, speed: 4.8, bullets: 6, spread: 0.05, range: 108, reload: 144, dmg: 680, color: "#7e57c2", 
+        desc: "Poderoso e lento. Super carrega 30% mais devagar.", 
+        superName: "TORRETA EXPLOSIVA", 
+        superDesc: "Torreta 3000HP que explode em 3s e solta 3 patos (200dmg cada, 3000HP, perdem 249HP/s)",
+        gadgetDesc: "Paralisa patos existentes OU marca próximos 3 para paralisar. Cooldown 20s"
+    },
+    juju: { 
+        name: "JUJU", hp: 3800, speed: 6.8, bullets: 1, spread: 0.0, range: 650, reload: 55, dmg: 1400, color: "#76ff03", 
+        desc: "Magia de área. Super: Aura do Vazio.", 
+        superName: "O VAZIO", 
+        superDesc: "Zona que causa dano, veneno, reduz velocidade e puxa inimigos",
+        gadgetDesc: "Próximo ataque: +30%dmg, +50%área, -35%vel, +10%reload inimigos, bloqueia super 4s, quebra paredes. 17s",
+        isLobber: true 
+    }
 };
 
 let selectedBrawlerKey = localStorage.getItem('myBrawler') || 'shelly';
@@ -117,9 +233,53 @@ function initMenu() { renderMenuChar('homeCanvas', selectedBrawlerKey); buildGri
 function goToHome() { document.querySelectorAll('.menu-screen').forEach(s => s.style.display = 'none'); document.getElementById('homeScreen').style.display = 'flex'; renderMenuChar('homeCanvas', selectedBrawlerKey); }
 function goToSelection() { document.querySelectorAll('.menu-screen').forEach(s => s.style.display = 'none'); document.getElementById('selectionScreen').style.display = 'flex'; }
 function goToInfo(key) {
-    viewingBrawlerKey = key; document.querySelectorAll('.menu-screen').forEach(s => s.style.display = 'none'); document.getElementById('infoScreen').style.display = 'flex';
-    const b = BRAWLERS[key]; document.getElementById('infoName').innerText = b.name; document.getElementById('infoDesc').innerText = b.desc; document.getElementById('infoHp').innerText = b.hp;
-    document.getElementById('infoDmg').innerText = (b.bullets > 1) ? `${b.bullets} x ${b.dmg}` : b.dmg; document.getElementById('infoSuper').innerText = b.superName;
+    viewingBrawlerKey = key; 
+    document.querySelectorAll('.menu-screen').forEach(s => s.style.display = 'none'); 
+    document.getElementById('infoScreen').style.display = 'flex';
+    
+    const b = BRAWLERS[key]; 
+    
+    // Nome e descrição
+    document.getElementById('infoName').innerText = b.name; 
+    document.getElementById('infoDesc').innerText = b.desc;
+    
+    // Estatísticas básicas
+    document.getElementById('infoHp').innerText = b.hp;
+    
+    // Velocidade de movimento
+    let speedText = "MUITO LENTA";
+    if(b.speed >= 7.5) speedText = "RÁPIDA";
+    else if(b.speed >= 6.5) speedText = "NORMAL";
+    else if(b.speed >= 5.5) speedText = "LENTA";
+    document.getElementById('infoSpeed').innerText = speedText;
+    
+    // Ataque
+    document.getElementById('infoAttackName').innerText = b.name.toUpperCase();
+    document.getElementById('infoAttackDesc').innerText = b.desc;
+    document.getElementById('infoDmg').innerText = (b.bullets > 1) ? `${b.bullets} x ${b.dmg}` : b.dmg;
+    
+    // Alcance
+    let rangeText = "MUITO LONGO";
+    if(b.range <= 20) rangeText = "CURTO";
+    else if(b.range <= 50) rangeText = "MÉDIO";
+    else if(b.range <= 100) rangeText = "LONGO";
+    document.getElementById('infoRange').innerText = rangeText;
+    
+    // Velocidade de recarga
+    let reloadText = "MUITO LENTA";
+    if(b.reload <= 30) reloadText = "MUITO RÁPIDA";
+    else if(b.reload <= 50) reloadText = "RÁPIDA";
+    else if(b.reload <= 70) reloadText = "NORMAL";
+    else if(b.reload <= 100) reloadText = "LENTA";
+    document.getElementById('infoReload').innerText = reloadText;
+    
+    // Super
+    document.getElementById('infoSuperName').innerText = b.superName || "SUPER";
+    document.getElementById('infoSuperDesc').innerText = b.superDesc || "Habilidade especial poderosa";
+    
+    // Gadget
+    document.getElementById('infoGadgetDesc').innerText = b.gadgetDesc || "Acessório especial";
+    
     renderMenuChar('infoCanvas', key);
 }
 function selectBrawler() { selectedBrawlerKey = viewingBrawlerKey; localStorage.setItem('myBrawler', selectedBrawlerKey); goToHome(); }
@@ -149,9 +309,14 @@ const MAPS = [{ color: "#795548", wallColor: "#4e342e", bushColor: "#8d6e63", gr
 const TILE = 120;
 let walls=[], bushes=[], boxes=[], spawns=[], entities=[], bullets=[], particles=[], drops=[], punchEffects=[], turrets=[], ducks=[], coltMissiles=[];
 let player=null, cam={x:0, y:0}, gameActive=false, paused=false, survivors=0, gasRadius=0, currentMap=null;
-const joyMove={x:0, y:0, active:false, id:'j-move', stick:'stick-move', wasActive:false};
-const joyShoot={x:0, y:0, active:false, id:'j-shoot', stick:'stick-shoot', power: 0, wasActive:false};
+const joyMove={x:0, y:0, active:false, id:'j-move', stick:'stick-move', wasActive:false, baseX: 0, baseY: 0};
+const joyShoot={x:0, y:0, active:false, id:'j-shoot', stick:'stick-shoot', power: 0, wasActive:false, baseX: 0, baseY: 0};
 const joySuper={x:0, y:0, active:false, id:'j-super', stick:'stick-super', power: 0, wasActive:false};
+
+// Controles de teclado
+const keys = {w: false, a: false, s: false, d: false, alt: false, ctrl: false};
+let lastMoveTouch = null;
+let lastShootTouch = null;
 
 class PunchEffect {
     constructor(x, y, angle) {
@@ -202,50 +367,103 @@ class Duck {
         this.vx = 0;
         this.vy = 0;
         this.speed = 9;
-        this.attacksLeft = 5;
+        this.hp = 3000;
+        this.maxHp = 3000;
         this.dead = false;
         this.dmg = 200;
         this.target = null;
         this.size = 25;
         this.attackCooldown = 0;
+        this.paralyzeOnHit = false; // Flag para patos que paralisam (gadget do 8-bit)
     }
     update() {
         if(this.dead) return;
         
         if(this.attackCooldown > 0) this.attackCooldown--;
         
-        // Procurar alvo mais próximo
+        // Perder 249 HP por segundo naturalmente (~4.15 HP por frame a 60fps)
+        this.hp -= 4.15;
+        if(this.hp <= 0) {
+            this.dead = true;
+            return;
+        }
+        
+        // Procurar alvo mais próximo (VISÃO INFINITA)
         let closestDist = Infinity;
         this.target = null;
         for(let e of entities) {
             if(e !== this.owner && !e.dead) {
                 let d = dist(this.x, this.y, e.x, e.y);
-                if(d < closestDist && d < 800) {
+                if(d < closestDist) { // Sem limite de distância
                     closestDist = d;
                     this.target = e;
                 }
             }
         }
         
-        // Perseguir alvo
+        // Perseguir alvo com pathfinding básico
         if(this.target) {
             let angle = Math.atan2(this.target.y - this.y, this.target.x - this.x);
+            let nextX = this.x + Math.cos(angle) * this.speed;
+            let nextY = this.y + Math.sin(angle) * this.speed;
+            
+            // Se tem parede no caminho, tentar contornar
+            if(checkWall(nextX, nextY)) {
+                // Tentar direções alternativas
+                let bestAngle = angle;
+                let bestDist = Infinity;
+                
+                for(let offset of [-Math.PI/4, Math.PI/4, -Math.PI/2, Math.PI/2]) {
+                    let testAngle = angle + offset;
+                    let testX = this.x + Math.cos(testAngle) * this.speed;
+                    let testY = this.y + Math.sin(testAngle) * this.speed;
+                    
+                    if(!checkWall(testX, testY)) {
+                        let distToTarget = dist(testX, testY, this.target.x, this.target.y);
+                        if(distToTarget < bestDist) {
+                            bestDist = distToTarget;
+                            bestAngle = testAngle;
+                        }
+                    }
+                }
+                angle = bestAngle;
+            }
+            
             this.vx = Math.cos(angle) * this.speed;
             this.vy = Math.sin(angle) * this.speed;
             
             // Checar colisão com alvo
             if(dist(this.x, this.y, this.target.x, this.target.y) < 50 && this.attackCooldown <= 0) {
-                this.target.takeDamage(this.dmg, this.owner);
-                this.owner.hp = Math.min(this.owner.maxHp, this.owner.hp + 100);
-                particles.push(new Particle(this.owner.x, this.owner.y - 60, "+100 HP", "#00ff00"));
-                particles.push(new Particle(this.target.x, this.target.y - 50, "QUACK!", "#ffeb3b"));
+                // Aplicar dano
+                this.target.takeDamage(this.dmg, this.owner, false); // false = não dá super
                 
-                this.attacksLeft--;
-                this.attackCooldown = 30;
+                // VENENO: 400 dano/s por 4 segundos
+                this.target.poisonTimer = 240; // 4 segundos
+                this.target.poisonDamage = 400;
+                particles.push(new Particle(this.target.x, this.target.y - 70, "VENENO 400!", "#ff5252"));
                 
-                if(this.attacksLeft <= 0) {
-                    this.dead = true;
+                // CURA LENTA: 300 HP/s por 4 segundos DE CURA (APENAS se não estiver ativa)
+                if(!this.target.slowHealActive) {
+                    this.target.slowHealTimer = 240; // 4 segundos DE CURA efetiva (não conta se tomando dano)
+                    this.target.slowHealActive = true;
+                    particles.push(new Particle(this.target.x, this.target.y - 90, "CURA LENTA!", "#00ff00"));
                 }
+                
+                // Se tem paralisia do gadget do 8-bit
+                if(this.paralyzeOnHit) {
+                    this.target.stunTimer = 60; // 1 segundo
+                    particles.push(new Particle(this.target.x, this.target.y - 50, "PARALISIA!", "#ffeb3b"));
+                }
+                
+                // Curar dono
+                if(this.owner && !this.owner.dead) {
+                    this.owner.hp = Math.min(this.owner.maxHp, this.owner.hp + 100);
+                    particles.push(new Particle(this.owner.x, this.owner.y - 60, "+100 HP", "#00ff00"));
+                }
+                particles.push(new Particle(this.target.x, this.target.y - 30, "QUACK!", "#ffeb3b"));
+                
+                // PATO MORRE AO TOCAR (auto-destruição)
+                this.dead = true;
                 return;
             }
         } else {
@@ -253,14 +471,29 @@ class Duck {
             this.vy *= 0.95;
         }
         
-        // Movimento
-        if(!checkWall(this.x + this.vx, this.y)) this.x += this.vx;
-        if(!checkWall(this.x, this.y + this.vy)) this.y += this.vy;
+        // Movimento com evitar outros patos
+        let finalVx = this.vx;
+        let finalVy = this.vy;
+        
+        // Repulsão de outros patos (não grudar)
+        for(let otherDuck of ducks) {
+            if(otherDuck !== this && !otherDuck.dead) {
+                let d = dist(this.x, this.y, otherDuck.x, otherDuck.y);
+                if(d < 50) { // Muito perto
+                    let pushAngle = Math.atan2(this.y - otherDuck.y, this.x - otherDuck.x);
+                    finalVx += Math.cos(pushAngle) * 2;
+                    finalVy += Math.sin(pushAngle) * 2;
+                }
+            }
+        }
+        
+        if(!checkWall(this.x + finalVx, this.y)) this.x += finalVx;
+        if(!checkWall(this.x, this.y + finalVy)) this.y += finalVy;
     }
-    takeDamage(d) {
-        this.attacksLeft--;
+    takeDamage(d, attacker, giveSuper = true) {
+        this.hp -= d;
         particles.push(new Particle(this.x, this.y - 30, Math.floor(d), "#ff5252"));
-        if(this.attacksLeft <= 0) this.dead = true;
+        if(this.hp <= 0) this.dead = true;
     }
     draw() {
         if(this.dead) return;
@@ -293,14 +526,22 @@ class Duck {
         ctx.arc(-this.size * 0.5, -this.size * 0.4, 3, 0, Math.PI * 2);
         ctx.fill();
         
-        // Mostrar ataques restantes
+        // Barra de HP
+        let barWidth = this.size * 2;
+        let barHeight = 8;
+        ctx.fillStyle = "#111";
+        ctx.fillRect(-barWidth/2, -this.size - 25, barWidth, barHeight);
+        ctx.fillStyle = "#0f0";
+        ctx.fillRect(-barWidth/2, -this.size - 25, barWidth * (this.hp / this.maxHp), barHeight);
+        
+        // Mostrar HP numericamente
         ctx.fillStyle = "#fff";
-        ctx.font = "bold 16px Arial";
+        ctx.font = "bold 14px Arial";
         ctx.textAlign = "center";
         ctx.strokeStyle = "#000";
         ctx.lineWidth = 3;
-        ctx.strokeText(this.attacksLeft, 0, -this.size - 10);
-        ctx.fillText(this.attacksLeft, 0, -this.size - 10);
+        ctx.strokeText(Math.floor(this.hp), 0, -this.size - 30);
+        ctx.fillText(Math.floor(this.hp), 0, -this.size - 30);
         
         ctx.restore();
     }
@@ -321,12 +562,38 @@ class Turret {
     update() {
         if(this.dead) return;
         
+        // Torreta normal
         this.shootTimer++;
         if(this.shootTimer >= this.shootInterval) {
             this.shootTimer = 0;
-            // Soltar um pato
-            ducks.push(new Duck(this.x, this.y, this.owner, this));
-            particles.push(new Particle(this.x, this.y - 60, "QUACK!", "#ffeb3b"));
+            
+            // Verificar se há algum inimigo próximo (800 de alcance)
+            let hasNearbyEnemy = false;
+            for(let e of entities) {
+                if(e !== this.owner && !e.dead && dist(this.x, this.y, e.x, e.y) < 800) {
+                    hasNearbyEnemy = true;
+                    break;
+                }
+            }
+            
+            // Só soltar pato se tiver inimigo próximo
+            if(hasNearbyEnemy) {
+                let newDuck = new Duck(this.x, this.y, this.owner, this);
+                
+                // Verificar se owner tem gadget ativo (8-bit)
+                if(this.owner && this.owner.eighbitDucksToParalyze > 0) {
+                    newDuck.paralyzeOnHit = true;
+                    this.owner.eighbitDucksToParalyze--;
+                    particles.push(new Particle(this.x, this.y - 80, "PATO PARALISA!", "#ffeb3b"));
+                    
+                    if(this.owner.eighbitDucksToParalyze <= 0) {
+                        this.owner.eighbitGadgetActive = false;
+                    }
+                }
+                
+                ducks.push(newDuck);
+                particles.push(new Particle(this.x, this.y - 60, "QUACK!", "#ffeb3b"));
+            }
         }
     }
     takeDamage(d) {
@@ -369,7 +636,7 @@ class Turret {
 class Particle { constructor(x,y,t,c){this.x=x;this.y=y;this.text=t;this.color=c;this.life=50;this.vy=-2} update(){this.y+=this.vy;this.life--} draw(){ctx.globalAlpha=this.life/50;ctx.fillStyle=this.color;ctx.font="bold 28px 'Black Ops One'";ctx.strokeStyle="black";ctx.lineWidth=4;ctx.strokeText(this.text,this.x,this.y);ctx.fillText(this.text,this.x,this.y);ctx.globalAlpha=1} }
 
 class Bullet {
-    constructor(x,y,a,s,l,d,o, wallBuster=false, lobber=false, missile=false, isAura=false, stunDuration=0){
+    constructor(x,y,a,s,l,d,o, wallBuster=false, lobber=false, missile=false, isAura=false, stunDuration=0, giveSuper=true){
         this.x=x;this.y=y;this.angle = a; this.speed = s;
         this.vx=Math.cos(a)*s;this.vy=Math.sin(a)*s;
         this.life=l;this.maxLife=l;this.dmg=d;this.owner=o;
@@ -379,14 +646,66 @@ class Bullet {
         this.damageInterval = 20;
         this.lastDamageFrame = 0;
         this.stunDuration = stunDuration;
+        this.giveSuper = giveSuper; // Se este bullet dá carga de super
     }
     update(){
         if(this.isAura) {
             this.life--;
             this.lastDamageFrame++;
-            if(this.life <= 0) return;
             
-            if(this.lastDamageFrame >= this.damageInterval) {
+            if(this.life <= 0) {
+                // Quando a aura acaba, aplicar veneno em quem estava dentro
+                if(this.isJujuAura) {
+                    for(let e of entities) {
+                        if(e !== this.owner && !e.dead && dist(this.x, this.y, e.x, e.y) < 250) {
+                            e.poisonTimer = 300; // 5 segundos
+                            e.poisonDamage = 100;
+                            e.canUseSuper = true; // Liberar uso de super
+                            e.slowness = 0; // Remover lentidão
+                            particles.push(new Particle(e.x, e.y - 80, "ENVENENADO!", "#76ff03"));
+                        }
+                    }
+                }
+                return;
+            }
+            
+            // Dano e efeitos contínuos para quem está dentro da aura da Juju
+            if(this.isJujuAura && this.lastDamageFrame >= this.damageInterval) {
+                this.lastDamageFrame = 0;
+                for(let e of entities) {
+                    if(e !== this.owner && !e.dead) {
+                        let d = dist(this.x, this.y, e.x, e.y);
+                        if(d < 250) {
+                            // Dano
+                            e.takeDamage(this.dmg, this.owner);
+                            
+                            // Lentidão 50%
+                            e.slowness = 0.5;
+                            
+                            // Bloqueio de super
+                            e.canUseSuper = false;
+                            
+                            // Aumentar tempo de reload em 10%
+                            e.reloadTimer = Math.min(e.reloadTimer + 3, e.reloadTime * 1.1);
+                            
+                            // Atração suave para o centro
+                            let angle = Math.atan2(this.y - e.y, this.x - e.x);
+                            let pullForce = 2;
+                            if(!checkWall(e.x + Math.cos(angle) * pullForce, e.y)) {
+                                e.x += Math.cos(angle) * pullForce;
+                            }
+                            if(!checkWall(e.x, e.y + Math.sin(angle) * pullForce)) {
+                                e.y += Math.sin(angle) * pullForce;
+                            }
+                        } else {
+                            // Se saiu da aura, liberar
+                            if(e.slowness > 0 && e.slowness <= 0.5) e.slowness = 0;
+                            e.canUseSuper = true;
+                        }
+                    }
+                }
+            } else if(!this.isJujuAura && this.lastDamageFrame >= this.damageInterval) {
+                // Aura normal (antiga)
                 this.lastDamageFrame = 0;
                 for(let e of entities) {
                     if(e !== this.owner && !e.dead && dist(this.x, this.y, e.x, e.y) < 250) {
@@ -408,7 +727,17 @@ class Bullet {
             if(!this.wallBuster) { this.life=0; this.hitSomething=true; return; }
         }}
         for(let e of entities){if(e!==this.owner && !e.dead && dist(this.x,this.y,e.x,e.y)<45){
-            e.takeDamage(this.dmg,this.owner);
+            // Calcular dano baseado na distância (para Piper)
+            let finalDmg = this.dmg;
+            if(this.owner && this.owner.type === 'piper') {
+                // Distância percorrida = maxLife - life
+                let distTraveled = this.maxLife - this.life;
+                let distPercent = Math.min(1, distTraveled / this.maxLife);
+                // Dano mínimo 820, máximo 3400
+                finalDmg = 820 + (3400 - 820) * distPercent;
+            }
+            
+            e.takeDamage(finalDmg,this.owner, this.giveSuper);
             if(this.stunDuration > 0) {
                 e.stunTimer = this.stunDuration;
                 particles.push(new Particle(e.x, e.y - 70, "STUNNED!", "#ffeb3b"));
@@ -426,7 +755,7 @@ class Bullet {
         }
         let radius = (this.owner.type === 'juju') ? 160 : 130;
         for(let b of boxes){if(!b.dead && dist(this.x,this.y,b.x,b.y)<radius){b.hp-=this.dmg;if(b.hp<=0){b.dead=true;drops.push({x:b.x,y:b.y})}}}
-        for(let e of entities){if(e!==this.owner && !e.dead && dist(this.x,this.y,e.x,e.y)<radius-20) e.takeDamage(this.dmg,this.owner);}
+        for(let e of entities){if(e!==this.owner && !e.dead && dist(this.x,this.y,e.x,e.y)<radius-20) e.takeDamage(this.dmg,this.owner, this.giveSuper);}
     }
     draw(){ 
         if(this.isAura) {
@@ -461,6 +790,10 @@ class Brawler {
         this.shieldDecay = 0; // Para Edgar - taxa de decaimento do escudo
         this.bullNextStun = false; // Para Bull - próximo ataque paralisa
         this.jujuBuffed = false; // Para Juju - próximo ataque bufado
+        this.hasActiveSuperAura = false; // Para Juju - não pode ganhar super enquanto tem aura ativa
+        this.coltBuffedShot = false; // Para Colt - próximo tiro é super tiro
+        this.damageReduction = 0; // Para 8-BIT - redução de dano
+        this.damageReductionTimer = 0; // Para 8-BIT - timer de redução
         this.dashFrames = 0; this.dashVX = 0; this.dashVY = 0; this.dashDmg = 0;
         this.botAttackTimer = 0;
         this.botSuperCooldown = 0;
@@ -471,6 +804,18 @@ class Brawler {
         this.dashCooldown = 0;
         this.stunTimer = 0;
         this.speedBoostTimer = 0;
+        this.poisonTimer = 0; // Veneno da Juju
+        this.poisonDamage = 0; // Dano do veneno
+        this.slowness = 0; // Lentidão da Juju
+        this.canUseSuper = true; // Pode usar super (bloqueado pela Juju)
+        this.piperFlying = false; // Para Piper - está voando
+        this.piperFlyTarget = {x: 0, y: 0}; // Destino do voo
+        this.piperFlyStart = {x: 0, y: 0}; // Ponto de partida
+        this.piperFlyProgress = 0; // Progresso do voo
+        this.slowHealTimer = 0; // Timer de cura lenta (patos do 8-bit)
+        this.slowHealActive = false; // Se está com cura lenta ativa
+        this.eighbitGadgetActive = false; // Gadget do 8-bit está ativo
+        this.eighbitDucksToParalyze = 0; // Quantos patos devem ter paralisia
     }
     update(){
         if(this.dead)return;
@@ -482,6 +827,45 @@ class Brawler {
         if(this.dashCooldown > 0) this.dashCooldown--;
         if(this.speedBoostTimer > 0) this.speedBoostTimer--;
         if(this.gadgetCooldown > 0) this.gadgetCooldown--;
+        
+        if(this.damageReductionTimer > 0) {
+            this.damageReductionTimer--;
+            if(this.damageReductionTimer <= 0) this.damageReduction = 0;
+        }
+        
+        // Gerenciar veneno da Juju
+        if(this.poisonTimer > 0) {
+            this.poisonTimer--;
+            if(this.poisonTimer % 60 === 0) { // A cada 1 segundo
+                this.takeDamage(this.poisonDamage, null);
+                particles.push(new Particle(this.x, this.y - 60, "VENENO", "#76ff03"));
+            }
+        }
+        
+        // Gerenciar lentidão
+        if(this.slowness > 0) {
+            this.slowness -= 0.01;
+            if(this.slowness < 0) this.slowness = 0;
+        }
+        
+        // Gerenciar cura lenta (patos do 8-bit) - SÓ CONTA QUANDO CURANDO
+        if(this.slowHealTimer > 0 && this.slowHealActive) {
+            // Só diminui timer se está curando (regenTimer > 120)
+            if(this.regenTimer > 120 && !this.dead) {
+                this.slowHealTimer--;
+                // Curar 300 HP por segundo (5 HP por frame a 60fps)
+                this.hp = Math.min(this.maxHp, this.hp + 5);
+            }
+            
+            if(this.slowHealTimer <= 0) {
+                this.slowHealActive = false;
+            }
+        }
+        
+        // Gerenciar bloqueio de super
+        if(!this.canUseSuper) {
+            // Será gerenciado pela aura
+        }
         
         // Decaimento do escudo do Edgar
         if(this.shieldHP > 0) {
@@ -524,9 +908,21 @@ class Brawler {
             
             entities.forEach(e => {
                 if(e !== this && !e.dead && dist(this.x, this.y, e.x, e.y) < 70) {
-                    e.takeDamage(this.dmg * 0.8, this);
+                    e.takeDamage(this.dmg * 0.8, this, false); // giveSuper=false
                 }
             });
+            
+            // Destruir torretas
+            turrets.forEach(t => {
+                if(t.owner !== this && dist(this.x, this.y, t.x, t.y) < 100) {
+                    if(t.takeDamage) {
+                        t.takeDamage(9999);
+                    } else {
+                        t.dead = true; // Torreta explosiva
+                    }
+                }
+            });
+            
             return;
         }
         
@@ -541,6 +937,17 @@ class Brawler {
             entities.forEach(e => {
                 if(e !== this && !e.dead && dist(this.x, this.y, e.x, e.y) < 70) { 
                     e.takeDamage(this.dashDmg, this);
+                }
+            });
+            
+            // Edgar também destrói torretas
+            turrets.forEach(t => {
+                if(t.owner !== this && dist(this.x, this.y, t.x, t.y) < 100) {
+                    if(t.takeDamage) {
+                        t.takeDamage(9999);
+                    } else {
+                        t.dead = true; // Torreta explosiva
+                    }
                 }
             });
             boxes.forEach(b => {
@@ -562,13 +969,14 @@ class Brawler {
         let mx=0,my=0;
         if(this.isPlayer){
             let currentSpeed = this.speedBoostTimer > 0 ? this.speed * 1.5 : this.speed;
+            currentSpeed *= (1 - this.slowness); // Aplicar lentidão
             if(joyMove.active){mx=joyMove.x*currentSpeed;my=joyMove.y*currentSpeed}
             if(joySuper.active && this.superCharge >= 100) this.angle = Math.atan2(joySuper.y, joySuper.x);
             else if(joyShoot.active) this.angle = Math.atan2(joyShoot.y, joyShoot.x);
             else if(joyMove.active) this.angle = Math.atan2(my,mx);
             const btnSuper = document.getElementById('j-super'); const notify = document.getElementById('super-notify');
             if(this.superCharge >= 100) { btnSuper.classList.add('super-ready'); notify.style.display = 'block'; } else { btnSuper.classList.remove('super-ready'); notify.style.display = 'none'; }
-        } else { this.runAI(); mx=Math.cos(this.moveDir)*this.aiSpeed; my=Math.sin(this.moveDir)*this.aiSpeed; }
+        } else { this.runAI(); mx=Math.cos(this.moveDir)*this.aiSpeed*(1-this.slowness); my=Math.sin(this.moveDir)*this.aiSpeed*(1-this.slowness); }
         if(!checkWall(this.x+mx,this.y))this.x+=mx;if(!checkWall(this.x,this.y+my))this.y+=my;
         this.inBush=false;for(let b of bushes)if(this.x>b.x && this.x<b.x+TILE && this.y>b.y && this.y<b.y+TILE){this.inBush=true;break}
         for(let i=drops.length-1;i>=0;i--)if(dist(this.x,this.y,drops[i].x,drops[i].y)<60){this.power++;this.hp=Math.min(this.hp+400,this.maxHp+400);this.maxHp+=400;drops.splice(i,1);if(this.isPlayer)document.getElementById('ui-power').innerText=this.power}
@@ -599,23 +1007,12 @@ class Brawler {
             }
         }
         
-        // Colt - 1 uso, 20s cooldown, míssil teleguiado
-        else if(this.type === 'colt') {
+        // Colt - 1 uso, 20s cooldown, próximo tiro +1300 dano
+        else if(this.type === 'piper') {
             if(this.gadgetCooldown <= 0) {
-                // Criar míssil teleguiado
-                let missile = {
-                    x: this.x,
-                    y: this.y,
-                    vx: Math.cos(this.angle) * 15,
-                    vy: Math.sin(this.angle) * 15,
-                    owner: this,
-                    life: 180,
-                    speed: 15,
-                    exploded: false
-                };
-                coltMissiles.push(missile);
+                this.coltBuffedShot = true;
                 this.gadgetCooldown = 1200; // 20 segundos
-                particles.push(new Particle(this.x, this.y, "MÍSSIL!", "#4dd0e1"));
+                particles.push(new Particle(this.x, this.y, "SUPER TIRO!", "#4dd0e1"));
             }
         }
         
@@ -628,12 +1025,52 @@ class Brawler {
             }
         }
         
-        // Juju - 17s cooldown, buff no próximo ataque
+        // 8-BIT - Paralisa patos existentes ou marca próximos
+        else if(this.type === '8bit') {
+            if(this.gadgetCooldown <= 0) {
+                // Contar patinhos do jogador
+                let myDucks = ducks.filter(d => d.owner === this && !d.dead);
+                
+                if(myDucks.length > 0) {
+                    // Fazer patos existentes paralisarem ao bater
+                    myDucks.forEach(duck => {
+                        duck.paralyzeOnHit = true;
+                    });
+                    particles.push(new Particle(this.x, this.y, `${myDucks.length} PATOS BUFFADOS!`, "#7e57c2"));
+                } else {
+                    // Marcar que próximos 3 patos terão paralisia
+                    this.eighbitDucksToParalyze = 3;
+                    this.eighbitGadgetActive = true;
+                    particles.push(new Particle(this.x, this.y, "PRÓXIMOS PATOS PARALISAM!", "#7e57c2"));
+                }
+                
+                this.gadgetCooldown = 1200; // 20 segundos
+            }
+        }
+        
+        // Juju - 17s cooldown, buff no próximo ataque + efeito na super
         else if(this.type === 'juju') {
             if(this.gadgetCooldown <= 0) {
                 this.jujuBuffed = true;
                 this.gadgetCooldown = 1020; // 17 segundos
                 particles.push(new Particle(this.x, this.y, "BUFF!", "#76ff03"));
+                
+                // Se tiver super ativa no mapa, aplicar efeito extra
+                if(this.hasActiveSuperAura) {
+                    // Encontrar inimigos dentro da super e aplicar stun + veneno extra
+                    for(let b of bullets) {
+                        if(b.isJujuAura && b.owner === this) {
+                            for(let e of entities) {
+                                if(e !== this && !e.dead && dist(b.x, b.y, e.x, e.y) < 250) {
+                                    e.stunTimer = 60; // 1 segundo de paralisia
+                                    e.poisonTimer += 120; // +2 segundos de veneno
+                                    particles.push(new Particle(e.x, e.y - 80, "STUN +VENENO!", "#76ff03"));
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
             }
         }
     }
@@ -660,37 +1097,181 @@ class Brawler {
         this.botAttackTimer--;
         let distCenter = dist(this.x, this.y, MAP_W/2, MAP_H/2);
         if(distCenter > gasRadius - 200) { this.moveDir = Math.atan2((MAP_H/2) - this.y, (MAP_W/2) - this.x); this.aiSpeed = this.speed; return; }
+        
         const canSee=(e)=>{
             if(!e||e.dead)return false;
             let d=dist(this.x,this.y,e.x,e.y);
             if(e.inBush&&!e.revealed&&d>200)return false;
             return hasLOS(this.x,this.y,e.x,e.y);
         };
-        if(!this.target||this.target.dead||!canSee(this.target)) this.target=entities.find(e=>e!==this&&!e.dead&&canSee(e));
+        
+        const canAttackThroughWall = (this.type === 'juju' || (this.type === 'bull' && this.superCharge >= 100) || (this.type === 'shelly' && this.superCharge >= 100));
+        
+        // Procurar alvo, mesmo atrás de parede se puder atacar através dela
+        if(!this.target||this.target.dead||(canAttackThroughWall ? false : !canSee(this.target))) {
+            this.target = entities.find(e => e !== this && !e.dead && (canAttackThroughWall || canSee(e)));
+        }
+        
+        // Procurar powercube mais próxima se não tiver alvo
+        let closestDrop = null;
+        let closestDropDist = Infinity;
+        if(!this.target) {
+            for(let d of drops) {
+                let dd = dist(this.x, this.y, d.x, d.y);
+                if(dd < closestDropDist && dd < 400) {
+                    closestDropDist = dd;
+                    closestDrop = d;
+                }
+            }
+        }
+        
+        // Procurar caixa ou torreta explosiva mais próxima
+        let closestBox = null;
+        let closestBoxDist = Infinity;
+        if(!this.target && !closestDrop) {
+            // Procurar caixas
+            for(let b of boxes) {
+                if(!b.dead) {
+                    let bd = dist(this.x, this.y, b.x, b.y);
+                    if(bd < closestBoxDist && bd < 500) {
+                        closestBoxDist = bd;
+                        closestBox = b;
+                    }
+                }
+            }
+            
+            // Procurar torretas explosivas (prioridade!)
+            for(let t of turrets) {
+                if(t.isExplosive && t.owner !== this) {
+                    let td = dist(this.x, this.y, t.x, t.y);
+                    if(td < closestBoxDist && td < 600) {
+                        closestBoxDist = td;
+                        closestBox = t; // Tratar como "caixa" para destruir
+                    }
+                }
+            }
+        }
         
         if(this.target){
             let dAlvo=dist(this.x,this.y,this.target.x,this.target.y);
             let a=Math.atan2(this.target.y-this.y,this.target.x-this.x);
+            let hasLOSToTarget = hasLOS(this.x, this.y, this.target.x, this.target.y);
+            
+            // Usar gadget se disponível e perto do inimigo
+            if(this.gadgetCooldown <= 0 && dAlvo < 300) {
+                this.useGadget();
+            }
             
             if(this.type === 'edgar') {
-                if(dAlvo > 350 && this.superCharge >= 100 && this.botSuperCooldown <= 0) { this.shoot(true, 1); this.botSuperCooldown = 180; }
-                else if(dAlvo < 100) { this.moveDir = a; this.aiSpeed = this.speed; }
-                else if(dAlvo < 150) { this.aiSpeed = 0; }
-                else { this.moveDir = a; this.aiSpeed = this.speed; }
+                // Edgar persegue mas não cola tanto
+                if(dAlvo > 400 && this.superCharge >= 100 && this.botSuperCooldown <= 0) { 
+                    this.shoot(true, 1); 
+                    this.botSuperCooldown = 240; // Cooldown maior
+                }
+                
+                // Manter distância mais segura
+                if(dAlvo < 60) {
+                    this.moveDir = a + Math.PI; // Recuar se muito perto
+                    this.aiSpeed = this.speed;
+                } else if(dAlvo > 100) {
+                    this.moveDir = a; // Aproximar se longe
+                    this.aiSpeed = this.speed;
+                } else {
+                    this.aiSpeed = 0; // Parar na distância ideal
+                }
+                
                 this.angle = a;
-                if(this.ammo>0 && this.botAttackTimer <= 0 && dAlvo < 100) { this.shoot(false, 1); this.botAttackTimer = 35; }
+                // Atacar com menos frequência
+                if(this.ammo>0 && this.punchCooldown <= 0 && dAlvo < 90 && Math.random() < 0.7) { 
+                    this.shoot(false, 1); 
+                }
+            } else if(this.type === 'juju') {
+                // Juju pode atacar através de paredes
+                if(!hasLOSToTarget && dAlvo > 300) {
+                    this.moveDir = a;
+                    this.aiSpeed = this.speed;
+                } else if(dAlvo < 400) {
+                    this.moveDir = a + Math.PI;
+                    this.aiSpeed = this.speed;
+                } else {
+                    this.aiSpeed = 0;
+                }
+                this.angle = a;
+                if(this.ammo>0 && this.botAttackTimer <= 0 && dAlvo < 700) {
+                    this.shoot(false, Math.min(1, dAlvo/650));
+                    this.botAttackTimer = 70;
+                }
+                if(this.superCharge>=100 && this.botSuperCooldown <= 0 && !this.hasActiveSuperAura) { 
+                    this.shoot(true, 1.0); 
+                    this.botSuperCooldown = 300; 
+                }
+            } else if(this.type === 'bull' || this.type === 'shelly') {
+                // Bull e Shelly podem usar super através de paredes
+                if(!hasLOSToTarget) {
+                    if(this.superCharge >= 100 && dAlvo < 500) {
+                        this.angle = a;
+                        this.shoot(true, 1.0);
+                        this.botSuperCooldown = 300;
+                    } else {
+                        this.moveDir = a;
+                        this.aiSpeed = this.speed;
+                    }
+                } else {
+                    if(dAlvo<300){this.moveDir=a+Math.PI;this.aiSpeed=this.speed} 
+                    else if(dAlvo>450){this.moveDir=a;this.aiSpeed=this.speed} 
+                    else {this.aiSpeed=0}
+                    this.angle = a;
+                    if(this.ammo>0 && this.botAttackTimer <= 0) { 
+                        this.shoot(false, 1); 
+                        this.botAttackTimer = 60; 
+                    }
+                    if(this.superCharge>=100 && this.botSuperCooldown <= 0 && dAlvo < 400) { 
+                        this.shoot(true, 1.0); 
+                        this.botSuperCooldown = 300; 
+                    }
+                }
             } else {
-                if(dAlvo<300){this.moveDir=a+Math.PI;this.aiSpeed=this.speed} else if(dAlvo>450){this.moveDir=a;this.aiSpeed=this.speed} else {this.aiSpeed=0}
+                if(dAlvo<300){this.moveDir=a+Math.PI;this.aiSpeed=this.speed} 
+                else if(dAlvo>450){this.moveDir=a;this.aiSpeed=this.speed} 
+                else {this.aiSpeed=0}
                 this.angle = a;
                 let attackChance = (this.type === '8bit') ? 0.04 : 0.1;
-                if(this.ammo>0 && this.botAttackTimer <= 0 && Math.random()<attackChance) { this.shoot(false, Math.min(1, dAlvo/650)); this.botAttackTimer = (this.type === '8bit') ? 120 : 60; }
-                if(this.superCharge>=100 && this.botSuperCooldown <= 0) { this.shoot(true, 1.0); this.botSuperCooldown = 300; }
+                if(this.ammo>0 && this.botAttackTimer <= 0 && Math.random()<attackChance) { 
+                    this.shoot(false, Math.min(1, dAlvo/650)); 
+                    this.botAttackTimer = (this.type === '8bit') ? 120 : 60; 
+                }
+                if(this.superCharge>=100 && this.botSuperCooldown <= 0) { 
+                    this.shoot(true, 1.0); 
+                    this.botSuperCooldown = 300; 
+                }
             }
-        } else { if(this.decisionTimer<=0){this.decisionTimer=60;this.moveDir=Math.random()*Math.PI*2} this.aiSpeed=this.speed*0.5; this.angle = this.moveDir; }
+        } else if(closestDrop) {
+            // Ir pegar powercube
+            this.moveDir = Math.atan2(closestDrop.y - this.y, closestDrop.x - this.x);
+            this.aiSpeed = this.speed;
+            this.angle = this.moveDir;
+        } else if(closestBox) {
+            // Ir quebrar caixa
+            this.moveDir = Math.atan2(closestBox.y - this.y, closestBox.x - this.x);
+            this.aiSpeed = this.speed;
+            this.angle = this.moveDir;
+            if(this.ammo > 0 && this.botAttackTimer <= 0 && closestBoxDist < 200) {
+                this.shoot(false, 1);
+                this.botAttackTimer = 60;
+            }
+        } else { 
+            // Patrulhar
+            if(this.decisionTimer<=0){
+                this.decisionTimer=120;
+                this.moveDir=Math.random()*Math.PI*2;
+            } 
+            this.aiSpeed=this.speed*0.5; 
+            this.angle = this.moveDir; 
+        }
     }
     shoot(isSuper, joyPowerInput = 1.0){
         if(isSuper) { 
-            if(this.superCharge < 100) return; 
+            if(this.superCharge < 100 || !this.canUseSuper) return; // Bloqueado pela Juju
             this.superCharge = 0;
 
             if(this.type === 'edgar') {
@@ -720,8 +1301,24 @@ class Brawler {
             }
 
             if(this.type === 'juju') {
+                if(this.hasActiveSuperAura) return; // Não pode usar super se já tem uma ativa
+                
+                this.hasActiveSuperAura = true;
                 entities.forEach(e => { if(e !== this) e.markedTimer = 60; });
-                bullets.push(new Bullet(this.x + Math.cos(this.angle)*(650*joyPowerInput), this.y + Math.sin(this.angle)*(650*joyPowerInput), 0, 0, 300, 70, this, false, false, false, true));
+                
+                let aura = new Bullet(
+                    this.x + Math.cos(this.angle)*(650*joyPowerInput), 
+                    this.y + Math.sin(this.angle)*(650*joyPowerInput), 
+                    0, 0, 360, // 6 segundos de duração (60fps * 6)
+                    100, // 100 de dano por tick
+                    this, false, false, false, true
+                );
+                aura.isJujuAura = true;
+                bullets.push(aura);
+                
+                // Após a super acabar, liberar para ganhar super novamente
+                setTimeout(() => { this.hasActiveSuperAura = false; }, 6000);
+                
                 return;
             }
 
@@ -737,24 +1334,25 @@ class Brawler {
             if(this.type === 'shelly') { 
                 let sA = this.angle - 0.2; 
                 let totalDmg = this.dmg * (1 + this.power * 0.1);
-                for(let i=0; i<5; i++) bullets.push(new Bullet(this.x, this.y, sA + (i*0.1), 20, 60, totalDmg*1.5, this, true)); 
+                for(let i=0; i<5; i++) bullets.push(new Bullet(this.x, this.y, sA + (i*0.1), 20, 60, totalDmg*1.5, this, true, false, false, false, 0, false)); // giveSuper=false
                 return; 
             }
 
             if(this.type === '8bit'){ 
-                // Contar torretas do jogador
-                let playerTurrets = turrets.filter(t => t.owner === this);
-                
-                if(playerTurrets.length >= 1) {
-                    // Remover a torreta mais antiga
-                    let oldestTurret = playerTurrets[0];
-                    oldestTurret.dead = true;
-                    particles.push(new Particle(oldestTurret.x, oldestTurret.y, "REMOVIDA!", "#ff5252"));
-                }
-                
-                // Criar nova torreta na posição do jogador
-                turrets.push(new Turret(this.x, this.y, this));
-                particles.push(new Particle(this.x, this.y, "TORRETA!", "#7e57c2"));
+                // Criar torreta explosiva (3000 HP, explode em 3s, solta 3 patos)
+                let explosiveTurret = {
+                    x: this.x,
+                    y: this.y,
+                    owner: this,
+                    hp: 3000,
+                    maxHp: 3000,
+                    timer: 180, // 3 segundos
+                    dead: false,
+                    size: 60,
+                    isExplosive: true
+                };
+                turrets.push(explosiveTurret);
+                particles.push(new Particle(this.x, this.y, "TORRETA EXPLOSIVA!", "#7e57c2"));
                 return; 
             }
         } else { 
@@ -784,7 +1382,10 @@ class Brawler {
             punchEffects.push(new PunchEffect(this.x, this.y, this.angle));
             
             let hitSomeone = false;
-            let punchRange = 120; // Alcance maior
+            let punchRange = 80; // Alcance reduzido para não grudar
+            
+            let hitEnemies = false;
+            let hitBoxes = false;
             
             // Acertar inimigos
             entities.forEach(e => {
@@ -793,35 +1394,39 @@ class Brawler {
                     let angleDiff = Math.abs(angleToEnemy - this.angle);
                     if(angleDiff > Math.PI) angleDiff = 2 * Math.PI - angleDiff;
                     
-                    if(angleDiff < 1.2) { // Ângulo de ataque maior
+                    if(angleDiff < 0.7) { // Ângulo de ataque mais restrito
                         e.takeDamage(totalDmg, this);
-                        this.hp = Math.min(this.maxHp, this.hp + 200);
-                        hitSomeone = true;
+                        hitEnemies = true;
                         particles.push(new Particle(e.x, e.y - 50, "POW!", "#ff5252"));
                     }
                 }
             });
             
-            // Acertar caixas
+            // Curar ao acertar inimigos
+            if(hitEnemies) {
+                this.hp = Math.min(this.maxHp, this.hp + 200);
+                particles.push(new Particle(this.x, this.y, "+200 HP", "#00ff00"));
+            }
+            
+            // Acertar caixas (sem curar)
             boxes.forEach(b => {
                 if(!b.dead && dist(this.x, this.y, b.x, b.y) < punchRange) {
                     let angleToBox = Math.atan2(b.y - this.y, b.x - this.x);
                     let angleDiff = Math.abs(angleToBox - this.angle);
                     if(angleDiff > Math.PI) angleDiff = 2 * Math.PI - angleDiff;
                     
-                    if(angleDiff < 1.2) {
+                    if(angleDiff < 0.7) {
                         b.hp -= totalDmg;
                         if(b.hp <= 0) {
                             b.dead = true;
                             drops.push({x: b.x, y: b.y});
                         }
-                        hitSomeone = true;
+                        hitBoxes = true;
                         particles.push(new Particle(b.x, b.y - 50, "BOOM!", "#ffeb3b"));
                     }
                 }
             });
             
-            if(hitSomeone) particles.push(new Particle(this.x, this.y, "+200 HP", "#00ff00"));
             return;
         }
 
@@ -839,22 +1444,40 @@ class Brawler {
         let count = this.bullets; let sA=this.angle-(this.spread/2), step=count>1?this.spread/(count-1):0;
         for(let i=0;i<count;i++) {
             let stunDur = 0;
+            let extraDmg = 0;
+            
             if(this.type === 'bull' && this.bullNextStun) {
                 stunDur = 90; // 1.5 segundos
-                if(i === 0) this.bullNextStun = false; // Só na primeira bala
+                if(i === 0) this.bullNextStun = false;
+            }
+            
+            if(this.type === 'piper' && this.coltBuffedShot) {
+                extraDmg = 1300;
+                if(i === 0) {
+                    this.coltBuffedShot = false;
+                    particles.push(new Particle(this.x, this.y, "SUPER TIRO!", "#4dd0e1"));
+                }
             }
             
             if(this.isLobber) {
                 let dmgMult = (this.type === 'juju' && this.jujuBuffed) ? 1.3 : 1;
                 let rangeMult = (this.type === 'juju' && this.jujuBuffed) ? 1.5 : 1;
-                bullets.push(new Bullet(this.x, this.y, sA+(step*i), 15, Math.max(10, Math.floor(43 * joyPowerInput * rangeMult)), totalDmg * dmgMult, this, false, true, false, false, stunDur));
+                let wallBuster = (this.type === 'juju' && this.jujuBuffed);
+                bullets.push(new Bullet(this.x, this.y, sA+(step*i), 15, Math.max(10, Math.floor(43 * joyPowerInput * rangeMult)), (totalDmg + extraDmg) * dmgMult, this, wallBuster, true, false, false, stunDur));
                 if(this.jujuBuffed) this.jujuBuffed = false;
             }
-            else bullets.push(new Bullet(this.x,this.y,sA+(step*i),25,this.rangeMult,totalDmg,this,false,false,false,false,stunDur));
+            else bullets.push(new Bullet(this.x,this.y,sA+(step*i),25,this.rangeMult,totalDmg + extraDmg,this,false,false,false,false,stunDur));
         }
     }
-    takeDamage(d, attacker){
+    takeDamage(d, attacker, giveSuper = true){
         if(this.immuneTimer > 0) return;
+        
+        // Aplicar redução de dano do 8-BIT
+        if(this.damageReduction > 0) {
+            let originalDamage = d;
+            d *= (1 - this.damageReduction);
+            particles.push(new Particle(this.x, this.y - 70, `-${Math.floor(originalDamage - d)}`, "#7e57c2"));
+        }
         
         // Proteger com escudo do Edgar
         if(this.shieldHP > 0) {
@@ -869,9 +1492,17 @@ class Brawler {
         }
         
         this.hp-=d; this.regenTimer=0; if(!this.dead) particles.push(new Particle(this.x,this.y-50,Math.floor(d),"#ff1744"));
-        if(attacker) { 
+        
+        // Dar carga de super APENAS se giveSuper for true
+        if(attacker && giveSuper) { 
             let oldCharge = attacker.superCharge;
             let charge = (attacker.type === 'edgar') ? 12 : 16;
+            
+            // 8-BIT carrega 30% mais devagar
+            if(attacker.type === '8bit') {
+                charge *= 0.7;
+            }
+            
             attacker.superCharge = Math.min(100, attacker.superCharge + charge);
             
             // Shelly - recarregar gadgets ao carregar 2 supers
@@ -914,7 +1545,9 @@ class Brawler {
         if(this.markedTimer > 0) { ctx.fillStyle = "#ffca28"; ctx.beginPath(); ctx.moveTo(0, -130); ctx.lineTo(-15, -150); ctx.lineTo(15, -150); ctx.fill(); }
         if(this.inBush)ctx.globalAlpha=0.5;
         ctx.fillStyle="#111"; ctx.fillRect(-60,-95,120,15);
-        ctx.fillStyle=this.isPlayer?"#00e676":"#d50000"; ctx.fillRect(-60,-95,120*(Math.max(0,this.hp)/this.maxHp),15);
+        // Verde durante cura lenta, senão cor normal
+        let hpColor = this.slowHealActive ? "#00ff00" : (this.isPlayer ? "#00e676" : "#d50000");
+        ctx.fillStyle=hpColor; ctx.fillRect(-60,-95,120*(Math.max(0,this.hp)/this.maxHp),15);
         ctx.fillStyle="#fff"; ctx.font="bold 12px Arial"; ctx.textAlign="center"; ctx.fillText(Math.floor(this.hp) + " / " + this.maxHp, 0, -83);
         ctx.fillStyle="#ff9100"; ctx.fillRect(-45,-78,30*this.ammo,5);
         ctx.fillStyle="#ffeb3b"; ctx.fillRect(-45,-71,90*(this.superCharge/100),5);
@@ -943,7 +1576,7 @@ function startGame(){
         if(t==='S')spawns.push({x:px+TILE/2,y:py+TILE/2});
     }
     spawns.sort(()=>Math.random()-0.5); player=new Brawler(spawns[0].x,spawns[0].y,selectedBrawlerKey,true); entities.push(player);
-    let types=['shelly','edgar','colt','bull','8bit','juju']; for(let i=1;i<spawns.length&&i<=9;i++)entities.push(new Brawler(spawns[i].x,spawns[i].y,types[Math.floor(Math.random()*types.length)],false));
+    let types=['shelly','edgar','piper','bull','8bit','juju']; for(let i=1;i<spawns.length&&i<=9;i++)entities.push(new Brawler(spawns[i].x,spawns[i].y,types[Math.floor(Math.random()*types.length)],false));
     survivors=entities.length; document.getElementById('ui-alive').innerText=survivors; gameActive=true; paused=false; loop();
     document.getElementById('btn-gadget').innerText = "⚙️";
     document.getElementById('btn-gadget').classList.remove('disabled');
@@ -954,6 +1587,9 @@ function endGame(win){gameActive=false;document.getElementById('endScreen').styl
 
 function loop(){
     if(!gameActive)return; requestAnimationFrame(loop); if(paused)return; gasRadius-=0.8;
+    
+    updateKeyboardControls(); // Atualizar controles de teclado
+    
     entities.forEach(e=>e.update()); 
     
     // Atualizar UI do gadget
@@ -968,29 +1604,78 @@ function loop(){
         if(b.life<=0)bullets.splice(i,1)
     }); 
     
-    turrets.forEach((t,i)=>{
-        t.update();
+    for(let i = turrets.length - 1; i >= 0; i--) {
+        let t = turrets[i];
+        
+        // Torreta explosiva (objeto simples)
+        if(t.isExplosive) {
+            if(t.dead) {
+                turrets.splice(i,1);
+                continue;
+            }
+            
+            t.timer--;
+            if(t.timer <= 0) {
+                // Explodir e soltar 3 patos
+                particles.push(new Particle(t.x, t.y, "EXPLOSÃO!", "#ff5252"));
+                
+                for(let j = 0; j < 3; j++) {
+                    let newDuck = new Duck(t.x, t.y, t.owner, null);
+                    
+                    // Verificar se owner tem gadget ativo (8-bit)
+                    if(t.owner && t.owner.eighbitDucksToParalyze > 0) {
+                        newDuck.paralyzeOnHit = true;
+                        t.owner.eighbitDucksToParalyze--;
+                        
+                        if(t.owner.eighbitDucksToParalyze <= 0) {
+                            t.owner.eighbitGadgetActive = false;
+                        }
+                    }
+                    
+                    ducks.push(newDuck);
+                }
+                particles.push(new Particle(t.x, t.y - 40, "3 PATOS!", "#ffeb3b"));
+                t.dead = true;
+            }
+        } else {
+            // Torreta normal (classe Turret)
+            if(t.update) t.update();
+        }
+        
         // Torretas podem receber dano de balas
         for(let b of bullets) {
             if(b.owner !== t.owner && dist(t.x, t.y, b.x, b.y) < 60) {
-                t.takeDamage(b.dmg);
+                if(t.takeDamage) {
+                    t.takeDamage(b.dmg);
+                } else {
+                    // Torreta explosiva (objeto simples)
+                    t.hp -= b.dmg;
+                    particles.push(new Particle(t.x, t.y - 30, Math.floor(b.dmg), "#ff5252"));
+                    if(t.hp <= 0) t.dead = true;
+                }
                 b.life = 0;
             }
         }
         if(t.dead) turrets.splice(i,1);
-    });
+    }
     
-    ducks.forEach((d,i)=>{
-        d.update();
+    for(let i = ducks.length - 1; i >= 0; i--) {
+        let d = ducks[i];
+        
+        // Todos os patos agora são da classe Duck
+        if(d.update) d.update();
+        
         // Patos podem receber dano de balas
         for(let b of bullets) {
             if(b.owner !== d.owner && dist(d.x, d.y, b.x, b.y) < 30) {
-                d.takeDamage(b.dmg);
+                if(d.takeDamage) {
+                    d.takeDamage(b.dmg, b.owner, false); // Não dá super
+                }
                 b.life = 0;
             }
         }
         if(d.dead) ducks.splice(i,1);
-    });
+    }
     
     punchEffects.forEach((p,i)=>{p.update();if(p.life<=0)punchEffects.splice(i,1)});
     particles.forEach((p,i)=>{p.update();if(p.life<=0)particles.splice(i,1)});
@@ -1000,8 +1685,46 @@ function loop(){
     ctx.fillStyle=currentMap.bushColor;bushes.forEach(b=>ctx.fillRect(b.x,b.y,b.w,b.h));
     drops.forEach(d=>{ctx.fillStyle="#00e5ff";ctx.fillRect(d.x-15,d.y-15,30,30)});
     boxes.forEach(b=>{if(b.dead)return;ctx.fillStyle="#ffb74d";ctx.fillRect(b.x-45,b.y-45,90,90);ctx.fillStyle="#000";ctx.fillRect(b.x-35,b.y-60,70,8);ctx.fillStyle="#0f0";ctx.fillRect(b.x-35,b.y-60,70*(b.hp/5000),8)});
-    turrets.forEach(t=>t.draw());
-    ducks.forEach(d=>d.draw());
+    turrets.forEach(t=>{
+        if(t.isExplosive) {
+            // Desenhar torreta explosiva
+            ctx.save();
+            ctx.translate(t.x, t.y);
+            
+            // Corpo vermelho piscante
+            let flash = Math.floor(t.timer / 10) % 2;
+            ctx.fillStyle = flash ? "#ff5252" : "#ff1744";
+            ctx.fillRect(-t.size, -t.size * 0.5, t.size * 2, t.size);
+            
+            // Torre
+            ctx.fillStyle = "#d32f2f";
+            ctx.fillRect(-t.size * 0.6, -t.size * 1.2, t.size * 1.2, t.size);
+            
+            // Símbolo de perigo
+            ctx.fillStyle = "#ffeb3b";
+            ctx.font = "bold 40px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("⚠", 0, 10);
+            
+            // Timer
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 20px Arial";
+            ctx.fillText(Math.ceil(t.timer / 60), 0, -t.size - 20);
+            
+            // Barra de HP
+            ctx.fillStyle = "#111";
+            ctx.fillRect(-t.size, -t.size - 35, t.size * 2, 12);
+            ctx.fillStyle = "#ff5252";
+            ctx.fillRect(-t.size, -t.size - 35, (t.size * 2) * (t.hp / t.maxHp), 12);
+            
+            ctx.restore();
+        } else {
+            t.draw();
+        }
+    });
+    ducks.forEach(d=>{
+        if(d.draw) d.draw();
+    });
     entities.sort((a,b)=>a.y-b.y).forEach(e=>e.draw()); 
     
     walls.forEach(w=>{ ctx.fillStyle=w.isBorder?"#222":currentMap.wallColor; ctx.fillRect(w.x,w.y,w.w,w.h); if(w.isBorder){ctx.strokeStyle="#444";ctx.lineWidth=4;ctx.strokeRect(w.x,w.y,w.w,w.h)} });
@@ -1068,7 +1791,7 @@ function loop(){
                 ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
                 ctx.lineWidth = 3;
                 ctx.stroke();
-            } else if(player.type === 'colt') {
+            } else if(player.type === 'piper') {
                 let maxRange = player.rangeMult * 10;
                 ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
                 ctx.lineWidth = 4;
@@ -1136,52 +1859,286 @@ function handleJoy(e,j,isP){
             else if(j.id === 'j-shoot') player.shoot(false, j.power); 
         } 
         j.active=false;j.x=0;j.y=0;j.power=0;j.justTouched=false;
+        j.baseX = 0; j.baseY = 0;
         document.getElementById(j.stick).style.transform=`translate(-50%,-50%)`; 
+        
+        // Esconder joystick dinâmico
+        if(j.id !== 'j-super') {
+            document.getElementById(j.id).style.opacity = '0';
+        }
         return; 
     }
     
-    // Auto-fire só quando o botão de tiro é TOCADO pela primeira vez
-    let wasJustTouched = !j.active; // Se não estava ativo, acabou de tocar
+    // Joystick dinâmico - captura primeiro toque para definir base
+    let wasJustTouched = !j.active;
+    let t = e.targetTouches[0];
     
-    let t=e.targetTouches[0],r=e.currentTarget.getBoundingClientRect(),dx=t.clientX-(r.left+r.width/2),dy=t.clientY-(r.top+r.height/2);
-    let distVal=Math.min(Math.hypot(dx,dy),50),ang=Math.atan2(dy,dx);
-    j.active=true;j.x=Math.cos(ang);j.y=Math.sin(ang);j.power=distVal/50;
-    document.getElementById(j.stick).style.transform=`translate(calc(-50% + ${Math.cos(ang)*distVal}px), calc(-50% + ${Math.sin(ang)*distVal}px))`;
+    if(wasJustTouched) {
+        // Primeiro toque - definir posição base do joystick
+        j.baseX = t.clientX;
+        j.baseY = t.clientY;
+        
+        // Mostrar e posicionar joystick
+        let joyEl = document.getElementById(j.id);
+        joyEl.style.left = j.baseX + 'px';
+        joyEl.style.top = j.baseY + 'px';
+        joyEl.style.opacity = '0.7';
+    }
     
-    // Auto-fire após atualizar o joystick
+    // Calcular offset do toque em relação à base
+    let dx = t.clientX - j.baseX;
+    let dy = t.clientY - j.baseY;
+    let distVal = Math.min(Math.hypot(dx,dy), 70);
+    let ang = Math.atan2(dy,dx);
+    
+    j.active = true;
+    j.x = Math.cos(ang);
+    j.y = Math.sin(ang);
+    j.power = distVal / 70;
+    
+    // Mover stick visual
+    document.getElementById(j.stick).style.transform = `translate(calc(-50% + ${Math.cos(ang)*distVal}px), calc(-50% + ${Math.sin(ang)*distVal}px))`;
+    
+    // Auto-fire MELHORADO - aceita pequenos movimentos (até 20px)
     if(j.id === 'j-shoot' && wasJustTouched && player) {
-        let closestTarget = null;
-        let closestDist = Infinity;
-        
-        // Procura inimigos
-        for(let e of entities) {
-            if(e !== player && !e.dead) {
-                let d = dist(player.x, player.y, e.x, e.y);
-                if(d < closestDist && d < 600) {
-                    closestDist = d;
-                    closestTarget = e;
-                }
-            }
-        }
-        
-        // Procura caixas se não achou inimigo próximo
-        if(!closestTarget) {
-            for(let b of boxes) {
-                if(!b.dead) {
-                    let d = dist(player.x, player.y, b.x, b.y);
+        // Dar um pequeno delay para permitir micro-movimentos
+        setTimeout(() => {
+            if(!j.active) return; // Usuário já soltou
+            
+            let closestTarget = null;
+            let closestDist = Infinity;
+            
+            // Procura inimigos
+            for(let e of entities) {
+                if(e !== player && !e.dead) {
+                    let d = dist(player.x, player.y, e.x, e.y);
                     if(d < closestDist && d < 600) {
                         closestDist = d;
-                        closestTarget = b;
+                        closestTarget = e;
                     }
                 }
             }
-        }
-        
-        if(closestTarget) {
-            player.angle = Math.atan2(closestTarget.y - player.y, closestTarget.x - player.x);
-        }
+            
+            // Procura caixas se não achou inimigo próximo
+            if(!closestTarget) {
+                for(let b of boxes) {
+                    if(!b.dead) {
+                        let d = dist(player.x, player.y, b.x, b.y);
+                        if(d < closestDist && d < 600) {
+                            closestDist = d;
+                            closestTarget = b;
+                        }
+                    }
+                }
+            }
+            
+            if(closestTarget) {
+                player.angle = Math.atan2(closestTarget.y - player.y, closestTarget.x - player.x);
+            }
+        }, 50); // 50ms de tolerância para movimento
     }
 }
+
+// Controle de teclado
+document.addEventListener('keydown', (e) => {
+    if(!gameActive || paused) return;
+    let key = e.key.toLowerCase();
+    
+    if(key === 'w') keys.w = true;
+    if(key === 'a') keys.a = true;
+    if(key === 's') keys.s = true;
+    if(key === 'd') keys.d = true;
+    if(key === 'alt') {
+        keys.alt = true;
+        e.preventDefault();
+        if(player && player.superCharge >= 100) {
+            player.shoot(true, 1);
+        }
+    }
+    if(key === 'control') {
+        keys.ctrl = true;
+        e.preventDefault();
+        if(player) player.useGadget();
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    let key = e.key.toLowerCase();
+    if(key === 'w') keys.w = false;
+    if(key === 'a') keys.a = false;
+    if(key === 's') keys.s = false;
+    if(key === 'd') keys.d = false;
+    if(key === 'alt') keys.alt = false;
+    if(key === 'control') keys.ctrl = false;
+});
+
+// Atualizar movimento com teclado no loop
+function updateKeyboardControls() {
+    if(!player || !gameActive || paused) return;
+    
+    let mx = 0, my = 0;
+    if(keys.w) my -= 1;
+    if(keys.s) my += 1;
+    if(keys.a) mx -= 1;
+    if(keys.d) mx += 1;
+    
+    // Só controlar joyMove se NÃO há touch de movimento ativo
+    if(!lastMoveTouch) {
+        if(mx !== 0 || my !== 0) {
+            // Normalizar diagonal
+            let mag = Math.hypot(mx, my);
+            joyMove.x = mx / mag;
+            joyMove.y = my / mag;
+            joyMove.active = true;
+        } else {
+            // Parar quando nenhuma tecla está pressionada
+            joyMove.x = 0;
+            joyMove.y = 0;
+            joyMove.active = false;
+        }
+    }
+    // Se há touch ativo, não fazer nada - deixar o touch controlar
+}
+
+// Touch dinâmico na tela toda
+let activeTouches = new Map();
+
+document.addEventListener('touchstart', (e) => {
+    if(!gameActive || paused) return;
+    
+    for(let touch of e.changedTouches) {
+        let x = touch.clientX;
+        let y = touch.clientY;
+        let screenWidth = window.innerWidth;
+        
+        // Ignorar toques em botões fixos (super, gadget, pause)
+        let superBtn = document.getElementById('j-super').getBoundingClientRect();
+        let gadgetBtn = document.getElementById('btn-gadget').getBoundingClientRect();
+        
+        if(x >= superBtn.left && x <= superBtn.right && y >= superBtn.top && y <= superBtn.bottom) continue;
+        if(x >= gadgetBtn.left && x <= gadgetBtn.right && y >= gadgetBtn.top && y <= gadgetBtn.bottom) continue;
+        
+        // Metade esquerda = movimento, metade direita = ataque
+        if(x < screenWidth / 2) {
+            if(!lastMoveTouch) {
+                lastMoveTouch = touch.identifier;
+                activeTouches.set(touch.identifier, {type: 'move', startX: x, startY: y});
+                joyMove.baseX = x;
+                joyMove.baseY = y;
+                joyMove.active = true;
+                
+                let joyEl = document.getElementById('j-move');
+                joyEl.style.left = x + 'px';
+                joyEl.style.top = y + 'px';
+                joyEl.style.opacity = '0.7';
+            }
+        } else {
+            if(!lastShootTouch) {
+                lastShootTouch = touch.identifier;
+                activeTouches.set(touch.identifier, {type: 'shoot', startX: x, startY: y, autoFireTriggered: false});
+                joyShoot.baseX = x;
+                joyShoot.baseY = y;
+                joyShoot.active = true;
+                
+                let joyEl = document.getElementById('j-shoot');
+                joyEl.style.left = x + 'px';
+                joyEl.style.top = y + 'px';
+                joyEl.style.opacity = '0.7';
+                
+                // Auto-fire IMEDIATO (ativa na hora)
+                let closestTarget = null;
+                let closestDist = Infinity;
+                
+                for(let e of entities) {
+                    if(e !== player && !e.dead) {
+                        let d = dist(player.x, player.y, e.x, e.y);
+                        if(d < closestDist && d < 600) {
+                            closestDist = d;
+                            closestTarget = e;
+                        }
+                    }
+                }
+                
+                if(!closestTarget) {
+                    for(let b of boxes) {
+                        if(!b.dead) {
+                            let d = dist(player.x, player.y, b.x, b.y);
+                            if(d < closestDist && d < 600) {
+                                closestDist = d;
+                                closestTarget = b;
+                            }
+                        }
+                    }
+                }
+                
+                if(closestTarget) {
+                    player.angle = Math.atan2(closestTarget.y - player.y, closestTarget.x - player.x);
+                    activeTouches.get(touch.identifier).autoFireTriggered = true;
+                }
+            }
+        }
+    }
+}, {passive: false});
+
+document.addEventListener('touchmove', (e) => {
+    if(!gameActive || paused) return;
+    e.preventDefault();
+    
+    for(let touch of e.changedTouches) {
+        let touchData = activeTouches.get(touch.identifier);
+        if(!touchData) continue;
+        
+        let dx = touch.clientX - (touchData.type === 'move' ? joyMove.baseX : joyShoot.baseX);
+        let dy = touch.clientY - (touchData.type === 'move' ? joyMove.baseY : joyShoot.baseY);
+        let distVal = Math.min(Math.hypot(dx, dy), 70);
+        let ang = Math.atan2(dy, dx);
+        
+        if(touchData.type === 'move') {
+            joyMove.x = Math.cos(ang);
+            joyMove.y = Math.sin(ang);
+            joyMove.power = distVal / 70;
+            document.getElementById('stick-move').style.transform = `translate(calc(-50% + ${Math.cos(ang)*distVal}px), calc(-50% + ${Math.sin(ang)*distVal}px))`;
+        } else {
+            joyShoot.x = Math.cos(ang);
+            joyShoot.y = Math.sin(ang);
+            joyShoot.power = distVal / 70;
+            document.getElementById('stick-shoot').style.transform = `translate(calc(-50% + ${Math.cos(ang)*distVal}px), calc(-50% + ${Math.sin(ang)*distVal}px))`;
+        }
+    }
+}, {passive: false});
+
+document.addEventListener('touchend', (e) => {
+    if(!gameActive || paused) return;
+    
+    for(let touch of e.changedTouches) {
+        let touchData = activeTouches.get(touch.identifier);
+        if(!touchData) continue;
+        
+        if(touch.identifier === lastMoveTouch) {
+            lastMoveTouch = null;
+            joyMove.active = false;
+            joyMove.x = 0;
+            joyMove.y = 0;
+            document.getElementById('stick-move').style.transform = 'translate(-50%, -50%)';
+            document.getElementById('j-move').style.opacity = '0';
+        }
+        
+        if(touch.identifier === lastShootTouch) {
+            lastShootTouch = null;
+            if(joyShoot.active) {
+                player.shoot(false, joyShoot.power);
+            }
+            joyShoot.active = false;
+            joyShoot.x = 0;
+            joyShoot.y = 0;
+            document.getElementById('stick-shoot').style.transform = 'translate(-50%, -50%)';
+            document.getElementById('j-shoot').style.opacity = '0';
+        }
+        
+        activeTouches.delete(touch.identifier);
+    }
+});
+
 [joyMove, joyShoot, joySuper].forEach(j=>{ let el=document.getElementById(j.id); el.addEventListener('touchstart',e=>handleJoy(e,j,true)); el.addEventListener('touchmove',e=>handleJoy(e,j,true)); el.addEventListener('touchend',e=>handleJoy(e,j,false)); });
 
 document.getElementById('btn-gadget').addEventListener('click', (e) => {
