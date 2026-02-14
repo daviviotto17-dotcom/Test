@@ -8,6 +8,109 @@
         @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Roboto:wght@700&display=swap');
         body { margin: 0; overflow: hidden; background: #0d0d0d; font-family: 'Roboto', sans-serif; touch-action: none; user-select: none; }
         canvas { display: block; }
+        
+        /* ========== SISTEMA DE TRATAMENTO DE ERROS ========== */
+        #error-banner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #c62828 0%, #d32f2f 100%);
+            color: white;
+            padding: 15px 20px;
+            z-index: 999999;
+            font-family: Arial, sans-serif;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        
+        #error-banner-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        #error-banner-text {
+            flex: 1;
+        }
+        
+        #error-banner-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        #error-banner-msg {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        #error-banner-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 20px;
+            transition: background 0.2s;
+        }
+        
+        #error-banner-close:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0d47a1;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999998;
+            font-family: Arial, sans-serif;
+        }
+        
+        #loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        #loading-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        #loading-details {
+            font-size: 12px;
+            opacity: 0.7;
+            max-width: 400px;
+            text-align: center;
+        }
+        /* ========== FIM DO SISTEMA DE ERROS ========== */
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: none; z-index: 5; }
         .hud-top { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; align-items: center; }
         .stat-box { background: rgba(0,0,0,0.7); padding: 8px 20px; border-radius: 12px; border: 2px solid #555; color: #fff; font-family: 'Black Ops One', cursive; font-size: 28px; text-shadow: 2px 2px 0 #000; display: flex; align-items: center; gap: 10px; }
@@ -48,6 +151,26 @@
     </style>
 </head>
 <body>
+
+<!-- ========== SISTEMA DE TRATAMENTO DE ERROS ========== -->
+<!-- Loading Screen -->
+<div id="loading-screen">
+    <div id="loading-spinner"></div>
+    <div id="loading-text">Carregando...</div>
+    <div id="loading-details">Verificando compatibilidade do navegador se demorar a carregar, pode ser um erro.</div>
+</div>
+
+<!-- Banner de Erro -->
+<div id="error-banner">
+    <div id="error-banner-content">
+        <div id="error-banner-text">
+            <div id="error-banner-title">⚠️ Aviso de Compatibilidade</div>
+            <div id="error-banner-msg">Possíveis bugs detectados neste dispositivo/navegador. O jogo pode não funcionar perfeitamente.</div>
+        </div>
+        <button id="error-banner-close" onclick="document.getElementById('error-banner').style.display='none'">Fechar</button>
+    </div>
+</div>
+<!-- ========== FIM DO SISTEMA DE ERROS ========== -->
 
 <div id="homeScreen" class="menu-screen">
     <div class="home-logo">SURVIVAL.IO<span style="font-size:20px; color:#fff; display:block">Battle Royale</span></div>
@@ -175,6 +298,176 @@
 <canvas id="cvs"></canvas>
 
 <script>
+// ========== SISTEMA COMPLETO DE TRATAMENTO DE ERROS ==========
+
+// Estado do sistema de erros
+const ErrorSystem = {
+    hasErrors: false,
+    errors: [],
+    warnings: [],
+    browserInfo: {},
+    
+    // Detectar informações do navegador
+    detectBrowser() {
+        const ua = navigator.userAgent;
+        this.browserInfo = {
+            userAgent: ua,
+            isChrome: ua.includes('Chrome') && !ua.includes('Edge'),
+            isFirefox: ua.includes('Firefox'),
+            isSafari: ua.includes('Safari') && !ua.includes('Chrome'),
+            isEdge: ua.includes('Edge'),
+            isKiwi: ua.includes('Kiwi'),
+            isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua),
+            platform: navigator.platform,
+            vendor: navigator.vendor
+        };
+        
+        console.log('🔍 Detecção de Navegador:', this.browserInfo);
+        return this.browserInfo;
+    },
+    
+    // Verificar compatibilidade
+    checkCompatibility() {
+        const issues = [];
+        
+        // Verificar Canvas
+        try {
+            const testCanvas = document.createElement('canvas');
+            const testCtx = testCanvas.getContext('2d');
+            if (!testCtx) {
+                issues.push('Canvas 2D não suportado');
+            }
+        } catch(e) {
+            issues.push('Erro ao criar Canvas: ' + e.message);
+        }
+        
+        // Verificar localStorage
+        try {
+            localStorage.setItem('test', 'test');
+            localStorage.removeItem('test');
+        } catch(e) {
+            issues.push('localStorage não disponível: ' + e.message);
+        }
+        
+        // Verificar requestAnimationFrame
+        if (!window.requestAnimationFrame) {
+            issues.push('requestAnimationFrame não suportado');
+        }
+        
+        // Verificar touch events (mobile)
+        if (this.browserInfo.isMobile && !('ontouchstart' in window)) {
+            issues.push('Touch events não suportados');
+        }
+        
+        if (issues.length > 0) {
+            console.warn('⚠️ Problemas de compatibilidade detectados:', issues);
+            this.warnings.push(...issues);
+        }
+        
+        return issues;
+    },
+    
+    // Log de erro personalizado
+    logError(error, context = '') {
+        const errorInfo = {
+            message: error.message || error,
+            stack: error.stack,
+            context: context,
+            timestamp: new Date().toISOString(),
+            browser: this.browserInfo
+        };
+        
+        this.errors.push(errorInfo);
+        this.hasErrors = true;
+        
+        console.error('❌ ERRO DETECTADO:', errorInfo);
+        
+        // Mostrar banner se erro crítico
+        if (context.includes('CRÍTICO')) {
+            this.showBanner('Erro Crítico Detectado', error.message);
+        }
+        
+        return errorInfo;
+    },
+    
+    // Mostrar banner de aviso
+    showBanner(title, message) {
+        const banner = document.getElementById('error-banner');
+        const titleEl = document.getElementById('error-banner-title');
+        const msgEl = document.getElementById('error-banner-msg');
+        
+        if (banner && titleEl && msgEl) {
+            titleEl.textContent = '⚠️ ' + title;
+            msgEl.textContent = message;
+            banner.style.display = 'block';
+        }
+    },
+    
+    // Remover loading screen
+    hideLoading() {
+        const loading = document.getElementById('loading-screen');
+        if (loading) {
+            setTimeout(() => {
+                loading.style.opacity = '0';
+                loading.style.transition = 'opacity 0.3s';
+                setTimeout(() => loading.style.display = 'none', 300);
+            }, 500);
+        }
+    },
+    
+    // Atualizar texto de loading
+    updateLoading(text) {
+        const loadingText = document.getElementById('loading-text');
+        if (loadingText) loadingText.textContent = text;
+    }
+};
+
+// Capturar TODOS os erros globais
+window.addEventListener('error', (event) => {
+    ErrorSystem.logError(event.error || event.message, 'Erro Global');
+    event.preventDefault(); // Não quebrar o jogo
+});
+
+// Capturar erros de Promise
+window.addEventListener('unhandledrejection', (event) => {
+    ErrorSystem.logError(event.reason, 'Promise Rejeitada');
+    event.preventDefault();
+});
+
+// Inicializar sistema de erros
+try {
+    ErrorSystem.updateLoading('Detectando navegador...');
+    ErrorSystem.detectBrowser();
+    
+    ErrorSystem.updateLoading('Verificando compatibilidade...');
+    const issues = ErrorSystem.checkCompatibility();
+    
+    if (issues.length > 0) {
+        ErrorSystem.showBanner(
+            'Aviso de Compatibilidade',
+            'Detectamos possíveis problemas neste navegador/dispositivo. O jogo pode apresentar bugs. Navegador detectado: ' + 
+            (ErrorSystem.browserInfo.isKiwi ? 'Kiwi' : ErrorSystem.browserInfo.isChrome ? 'Chrome' : 'Outro')
+        );
+    }
+    
+    ErrorSystem.updateLoading('Carregando jogo...');
+    console.log('✅ Sistema de erros inicializado com sucesso');
+} catch(e) {
+    console.error('❌ Erro ao inicializar sistema de erros:', e);
+}
+
+// ========== FIM DO SISTEMA DE ERROS ==========
+
+// Wrapper de segurança para funções críticas
+function safeExecute(fn, context = 'Função anônima') {
+    try {
+        return fn();
+    } catch(e) {
+        ErrorSystem.logError(e, context);
+        return null;
+    }
+}
+
 const cvs = document.getElementById('cvs');
 const ctx = cvs.getContext('2d');
 cvs.width = window.innerWidth;
@@ -1565,7 +1858,11 @@ function dist(x1,y1,x2,y2){return Math.hypot(x1-x2,y1-y2)}
 function checkWall(x,y){for(let w of walls)if(x>w.x&&x<w.x+w.w&&y>w.y&&y<w.y+w.h)return true;return false}
 
 function startGame(){
-    document.querySelectorAll('.menu-screen').forEach(s=>s.style.display='none');document.getElementById('ui-layer').style.display='block';
+    try {
+        // Remover loading screen se ainda estiver visível
+        ErrorSystem.hideLoading();
+        
+        document.querySelectorAll('.menu-screen').forEach(s=>s.style.display='none');document.getElementById('ui-layer').style.display='block';
     currentMap=MAPS[0]; walls=[]; bushes=[]; boxes=[]; spawns=[]; entities=[]; drops=[]; bullets=[]; particles=[]; punchEffects=[]; turrets=[]; ducks=[]; coltMissiles=[];
     let grid=currentMap.grid; MAP_W=grid[0].length*TILE; MAP_H=grid.length*TILE; gasRadius=MAP_W * 0.8;
     for(let y=0;y<grid.length;y++)for(let x=0;x<grid[0].length;x++){
@@ -1580,20 +1877,30 @@ function startGame(){
     survivors=entities.length; document.getElementById('ui-alive').innerText=survivors; gameActive=true; paused=false; loop();
     document.getElementById('btn-gadget').innerText = "⚙️";
     document.getElementById('btn-gadget').classList.remove('disabled');
+    
+    } catch(error) {
+        ErrorSystem.logError(error, 'CRÍTICO - StartGame');
+        console.error('❌ Erro ao iniciar jogo:', error);
+    }
 }
 
 function togglePause(){if(!gameActive)return;paused=!paused;document.getElementById('pauseMenu').style.display=paused?'flex':'none'}
 function endGame(win){gameActive=false;document.getElementById('endScreen').style.display='flex';document.getElementById('endTitle').innerText=win?"VITÓRIA!":"DERROTA";document.getElementById('endSub').innerText=win?"DOMINAÇÃO TOTAL!":"Posição: #"+survivors}
 
 function loop(){
-    if(!gameActive)return; requestAnimationFrame(loop); if(paused)return; gasRadius-=0.8;
+    if(!gameActive)return; 
     
-    updateKeyboardControls(); // Atualizar controles de teclado
-    
-    entities.forEach(e=>e.update()); 
-    
-    // Atualizar UI do gadget
-    if(player && !player.dead) player.updateGadgetUI();
+    try {
+        requestAnimationFrame(loop); 
+        if(paused)return; 
+        gasRadius-=0.8;
+        
+        updateKeyboardControls(); // Atualizar controles de teclado
+        
+        entities.forEach(e=>e.update()); 
+        
+        // Atualizar UI do gadget
+        if(player && !player.dead) player.updateGadgetUI();
     
     bullets.forEach((b,i)=>{
         b.update();
@@ -1849,6 +2156,12 @@ function loop(){
     }
     
     ctx.strokeStyle="rgba(0,255,0,0.3)";ctx.lineWidth=1500;ctx.beginPath();ctx.arc(MAP_W/2,MAP_H/2,gasRadius+750,0,Math.PI*2);ctx.stroke();ctx.restore();
+    
+    } catch(error) {
+        // Capturar erro do loop sem quebrar o jogo
+        ErrorSystem.logError(error, 'Loop Principal');
+        console.error('❌ Erro no loop do jogo:', error);
+    }
 }
 
 function handleJoy(e,j,isP){
@@ -2151,6 +2464,14 @@ document.getElementById('btn-gadget').addEventListener('touchstart', (e) => {
 });
 
 initMenu();
+
+// Remover loading screen quando tudo carregar
+setTimeout(() => {
+    ErrorSystem.hideLoading();
+    console.log('✅ Jogo carregado com sucesso!');
+    console.log('📊 Erros detectados:', ErrorSystem.errors.length);
+    console.log('⚠️ Avisos:', ErrorSystem.warnings.length);
+}, 1000);
 </script>
 </body>
 </html>
