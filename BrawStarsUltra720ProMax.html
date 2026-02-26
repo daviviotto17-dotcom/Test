@@ -157,7 +157,7 @@
 <div id="loading-screen">
     <div id="loading-spinner"></div>
     <div id="loading-text">Carregando...</div>
-    <div id="loading-details">Verificando compatibilidade do navegador se demorar a carregar, pode ser um erro.</div>
+    <div id="loading-details">Verificando compatibilidade do navegador</div>
 </div>
 
 <!-- Banner de Erro -->
@@ -2318,76 +2318,111 @@ let activeTouches = new Map();
 
 document.addEventListener('touchstart', (e) => {
     if(!gameActive || paused) return;
+    e.preventDefault();
     
     for(let touch of e.changedTouches) {
         let x = touch.clientX;
         let y = touch.clientY;
         let screenWidth = window.innerWidth;
         
-        // Ignorar toques em botões fixos (super, gadget, pause)
+        console.log('👆 Touch start:', x, y, 'id:', touch.identifier);
+        
+        // Ignorar toques em botões fixos
         let superBtn = document.getElementById('j-super').getBoundingClientRect();
         let gadgetBtn = document.getElementById('btn-gadget').getBoundingClientRect();
         
-        if(x >= superBtn.left && x <= superBtn.right && y >= superBtn.top && y <= superBtn.bottom) continue;
-        if(x >= gadgetBtn.left && x <= gadgetBtn.right && y >= gadgetBtn.top && y <= gadgetBtn.bottom) continue;
+        if(x >= superBtn.left && x <= superBtn.right && y >= superBtn.top && y <= superBtn.bottom) {
+            console.log('🔵 Botão super ignorado');
+            continue;
+        }
+        if(x >= gadgetBtn.left && x <= gadgetBtn.right && y >= gadgetBtn.top && y <= gadgetBtn.bottom) {
+            console.log('🔧 Botão gadget ignorado');
+            continue;
+        }
         
-        // Metade esquerda = movimento, metade direita = ataque
+        // METADE ESQUERDA = MOVIMENTO
         if(x < screenWidth / 2) {
-            if(!lastMoveTouch) {
-                lastMoveTouch = touch.identifier;
-                activeTouches.set(touch.identifier, {type: 'move', startX: x, startY: y});
-                joyMove.baseX = x;
-                joyMove.baseY = y;
-                joyMove.active = true;
-                
-                let joyEl = document.getElementById('j-move');
-                joyEl.style.left = x + 'px';
-                joyEl.style.top = y + 'px';
-                joyEl.style.opacity = '0.7';
+            console.log('🟢 MOVIMENTO detectado! x:', x, 'tela/2:', screenWidth/2);
+            
+            // Sempre permitir novo touch de movimento
+            if(lastMoveTouch) {
+                activeTouches.delete(lastMoveTouch);
             }
-        } else {
-            if(!lastShootTouch) {
-                lastShootTouch = touch.identifier;
-                activeTouches.set(touch.identifier, {type: 'shoot', startX: x, startY: y, autoFireTriggered: false});
-                joyShoot.baseX = x;
-                joyShoot.baseY = y;
-                joyShoot.active = true;
-                
-                let joyEl = document.getElementById('j-shoot');
-                joyEl.style.left = x + 'px';
-                joyEl.style.top = y + 'px';
-                joyEl.style.opacity = '0.7';
-                
-                // Auto-fire IMEDIATO (ativa na hora)
-                let closestTarget = null;
-                let closestDist = Infinity;
-                
-                for(let e of entities) {
-                    if(e !== player && !e.dead) {
-                        let d = dist(player.x, player.y, e.x, e.y);
+            
+            lastMoveTouch = touch.identifier;
+            activeTouches.set(touch.identifier, {type: 'move', startX: x, startY: y});
+            
+            joyMove.baseX = x;
+            joyMove.baseY = y;
+            joyMove.x = 0;
+            joyMove.y = 0;
+            joyMove.active = true;
+            
+            let joyEl = document.getElementById('j-move');
+            joyEl.style.left = x + 'px';
+            joyEl.style.top = y + 'px';
+            joyEl.style.opacity = '0.7';
+            
+            console.log('✅ Joystick movimento ATIVADO!', joyMove);
+        } 
+        // METADE DIREITA = ATAQUE
+        else {
+            console.log('🔴 ATAQUE detectado! x:', x, 'tela/2:', screenWidth/2);
+            
+            // Sempre permitir novo touch de ataque
+            if(lastShootTouch) {
+                activeTouches.delete(lastShootTouch);
+            }
+            
+            lastShootTouch = touch.identifier;
+            activeTouches.set(touch.identifier, {type: 'shoot', startX: x, startY: y, autoFireTriggered: false});
+            
+            joyShoot.baseX = x;
+            joyShoot.baseY = y;
+            joyShoot.x = 0;
+            joyShoot.y = 0;
+            joyShoot.active = true;
+            
+            let joyEl = document.getElementById('j-shoot');
+            joyEl.style.left = x + 'px';
+            joyEl.style.top = y + 'px';
+            joyEl.style.opacity = '0.7';
+            
+            console.log('✅ Joystick ataque ATIVADO!', joyShoot);
+            
+            // Auto-fire IMEDIATO
+            let closestTarget = null;
+            let closestDist = Infinity;
+            
+            // Procurar inimigo mais próximo
+            for(let e of entities) {
+                if(e !== player && !e.dead) {
+                    let d = dist(player.x, player.y, e.x, e.y);
+                    if(d < closestDist && d < 600) {
+                        closestDist = d;
+                        closestTarget = e;
+                    }
+                }
+            }
+            
+            // Se não achou inimigo, procurar caixa
+            if(!closestTarget) {
+                for(let b of boxes) {
+                    if(!b.dead) {
+                        let d = dist(player.x, player.y, b.x, b.y);
                         if(d < closestDist && d < 600) {
                             closestDist = d;
-                            closestTarget = e;
+                            closestTarget = b;
                         }
                     }
                 }
-                
-                if(!closestTarget) {
-                    for(let b of boxes) {
-                        if(!b.dead) {
-                            let d = dist(player.x, player.y, b.x, b.y);
-                            if(d < closestDist && d < 600) {
-                                closestDist = d;
-                                closestTarget = b;
-                            }
-                        }
-                    }
-                }
-                
-                if(closestTarget) {
-                    player.angle = Math.atan2(closestTarget.y - player.y, closestTarget.x - player.x);
-                    activeTouches.get(touch.identifier).autoFireTriggered = true;
-                }
+            }
+            
+            // Apontar para o alvo
+            if(closestTarget) {
+                player.angle = Math.atan2(closestTarget.y - player.y, closestTarget.x - player.x);
+                activeTouches.get(touch.identifier).autoFireTriggered = true;
+                console.log('🎯 Auto-fire ativado para alvo:', closestTarget);
             }
         }
     }
@@ -2399,7 +2434,10 @@ document.addEventListener('touchmove', (e) => {
     
     for(let touch of e.changedTouches) {
         let touchData = activeTouches.get(touch.identifier);
-        if(!touchData) continue;
+        if(!touchData) {
+            console.log('⚠️ Touch move sem touchData:', touch.identifier);
+            continue;
+        }
         
         let dx = touch.clientX - (touchData.type === 'move' ? joyMove.baseX : joyShoot.baseX);
         let dy = touch.clientY - (touchData.type === 'move' ? joyMove.baseY : joyShoot.baseY);
@@ -2410,12 +2448,16 @@ document.addEventListener('touchmove', (e) => {
             joyMove.x = Math.cos(ang);
             joyMove.y = Math.sin(ang);
             joyMove.power = distVal / 70;
+            joyMove.active = true; // Garantir que está ativo
             document.getElementById('stick-move').style.transform = `translate(calc(-50% + ${Math.cos(ang)*distVal}px), calc(-50% + ${Math.sin(ang)*distVal}px))`;
+            // console.log('🟢 Move:', joyMove.x.toFixed(2), joyMove.y.toFixed(2));
         } else {
             joyShoot.x = Math.cos(ang);
             joyShoot.y = Math.sin(ang);
             joyShoot.power = distVal / 70;
+            joyShoot.active = true; // Garantir que está ativo
             document.getElementById('stick-shoot').style.transform = `translate(calc(-50% + ${Math.cos(ang)*distVal}px), calc(-50% + ${Math.sin(ang)*distVal}px))`;
+            // console.log('🔴 Shoot:', joyShoot.x.toFixed(2), joyShoot.y.toFixed(2));
         }
     }
 }, {passive: false});
@@ -2428,6 +2470,7 @@ document.addEventListener('touchend', (e) => {
         if(!touchData) continue;
         
         if(touch.identifier === lastMoveTouch) {
+            console.log('🟢 MOVIMENTO soltou!');
             lastMoveTouch = null;
             joyMove.active = false;
             joyMove.x = 0;
@@ -2437,6 +2480,7 @@ document.addEventListener('touchend', (e) => {
         }
         
         if(touch.identifier === lastShootTouch) {
+            console.log('🔴 ATAQUE soltou!');
             lastShootTouch = null;
             if(joyShoot.active) {
                 player.shoot(false, joyShoot.power);
@@ -2465,13 +2509,15 @@ document.getElementById('btn-gadget').addEventListener('touchstart', (e) => {
 
 initMenu();
 
-// Remover loading screen quando tudo carregar
+// SEMPRE remover loading screen após 2 segundos
 setTimeout(() => {
     ErrorSystem.hideLoading();
     console.log('✅ Jogo carregado com sucesso!');
     console.log('📊 Erros detectados:', ErrorSystem.errors.length);
     console.log('⚠️ Avisos:', ErrorSystem.warnings.length);
-}, 1000);
+    console.log('🎮 Joysticks:', {joyMove, joyShoot});
+    console.log('🌐 Navegador:', ErrorSystem.browserInfo);
+}, 2000);
 </script>
 </body>
 </html>
